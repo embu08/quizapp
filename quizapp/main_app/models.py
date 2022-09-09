@@ -2,6 +2,7 @@ from django.db import models
 
 import users.models
 from quizapp import settings
+from django.utils import timezone
 
 
 class Categories(models.Model):
@@ -35,3 +36,18 @@ class Questions(models.Model):
 
     def __str__(self):
         return f'{self.test}; {self.question} - {self.correct_answer}'
+
+
+class PassedTests(models.Model):
+    test = models.ForeignKey('Test', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             null=True, blank=True, on_delete=models.CASCADE)
+    grade = models.DecimalField(max_digits=5, decimal_places=2)
+    data_passed = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f'{self.user} get {self.grade} for test {self.test}, {self.data_passed}'
+
+    def save_model(self, request, obj, form, change):
+        obj.added_by = request.user
+        super().save_model(request, obj, form, change)
