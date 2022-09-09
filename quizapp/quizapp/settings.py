@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'main_app.apps.MainAppConfig',
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,5 @@ try:
     from .local_settings import *
 except ImportError:
     pass
+
+AUTH_USER_MODEL = 'users.CustomUser'
