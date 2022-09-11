@@ -4,4 +4,5 @@ from django.views.decorators.cache import cache_page
 
 urlpatterns = [
     path('', home, name='home'),
+    path('create-test/', create_test_view, name='create')
 ]

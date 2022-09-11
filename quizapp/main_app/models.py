@@ -1,8 +1,6 @@
 from django.db import models
 
-import users.models
 from quizapp import settings
-from django.utils import timezone
 
 
 class Categories(models.Model):
@@ -16,14 +14,10 @@ class Test(models.Model):
     name = models.CharField(max_length=255, db_index=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               null=True, blank=True, on_delete=models.CASCADE)
-    category = models.ForeignKey('Categories', on_delete=models.PROTECT)
+    category = models.ForeignKey('Categories', on_delete=models.PROTECT, null=True)
 
     def __str__(self):
         return f'{self.name} by {self.owner}'
-
-    def save_model(self, request, obj, form, change):
-        obj.added_by = request.user
-        super().save_model(request, obj, form, change)
 
 
 class Questions(models.Model):
@@ -35,7 +29,7 @@ class Questions(models.Model):
     test = models.ForeignKey('Test', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return f'{self.test}; {self.question} - {self.correct_answer}'
+        return f'{self.test}; {self.question}'
 
 
 class PassedTests(models.Model):
@@ -43,11 +37,7 @@ class PassedTests(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              null=True, blank=True, on_delete=models.CASCADE)
     grade = models.DecimalField(max_digits=5, decimal_places=2)
-    data_passed = models.DateTimeField(default=timezone.now)
+    data_passed = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f'{self.user} get {self.grade} for test {self.test}, {self.data_passed}'
-
-    def save_model(self, request, obj, form, change):
-        obj.added_by = request.user
-        super().save_model(request, obj, form, change)

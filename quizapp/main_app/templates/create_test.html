@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="" method="POST" class="card">
+    {% csrf_token %}
+    {{ test_form.non_field_errors }}
+    {{ question_form.non_field_errors }}
+    <div class="card-header">
+        {% for tf in test_form %}
+        {{ tf.label }}
+        {{ tf }}
+        {{ tf.errors }}
+        {% endfor %}
+    </div>
+
+    <div class="card-body">
+        {{ question_form.as_p }}
+    </div>
+
+    <div class="card-footer">
+        <button type="submit">Add a question</button>
+        <a href="/">Finish</a>
+    </div>
+</form>
+
+
+{% endblock %}
