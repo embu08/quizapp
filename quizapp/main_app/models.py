@@ -14,10 +14,10 @@ class Test(models.Model):
     name = models.CharField(max_length=255, db_index=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               null=True, blank=True, on_delete=models.CASCADE)
-    category = models.ForeignKey('Categories', on_delete=models.PROTECT, null=True)
+    category = models.ForeignKey('Categories', blank=True, null=True, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f'{self.name} by {self.owner}'
+        return f'name: {self.name}, category: {self.category}, owner: {self.owner}'
 
 
 class Questions(models.Model):
@@ -26,10 +26,10 @@ class Questions(models.Model):
     answer_1 = models.CharField(max_length=255, null=True)
     answer_2 = models.CharField(max_length=255, null=True)
     answer_3 = models.CharField(max_length=255, null=True)
-    test = models.ForeignKey('Test', on_delete=models.CASCADE, null=True)
+    test = models.ForeignKey('Test', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return f'{self.test}; {self.question}'
+        return f'question: {self.question}, correct_answer: {self.correct_answer}'
 
 
 class PassedTests(models.Model):

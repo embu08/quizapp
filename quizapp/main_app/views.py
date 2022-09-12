@@ -1,7 +1,8 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.forms import modelformset_factory
-from django.views.generic import CreateView
+from django.views.generic import CreateView, ListView
 
 from .forms import *
 from .models import *
@@ -10,43 +11,41 @@ from .models import *
 def home(request):
     return HttpResponse('Hello world')
 
+class ShowAllTests(ListView):
+    model = Test
+    template_name = 'show_tests.html'
 
-# def create_test_view(request):
-#     question_formset = modelformset_factory(CreateQuestionForm, fields=('question', 'correct_answer'))
-#     answer_formset = modelformset_factory(CreateAnswerForm, fields=('answer_1', 'answer_2', 'answer_3'))
-#     if request.method == 'POST':
-#         question_form = question_formset(request.POST)
-#         answer_form = answer_formset(request.POST)
-#         test_form = CreateTestForm(request.POST)
-#         if test_form.is_valid() and question_form.is_valid() and answer_form.is_valid():
-#             print(test_form.cleaned_data)
-#         print(question_form.cleaned_data)
-#         print(answer_form.cleaned_data)
-#
-#     test_form = CreateTestForm()
-#     question_form = question_formset()
-#     answer_form = answer_formset()
-#     context = {'test_form': test_form, 'question_form': question_form, 'answer_form': answer_form, }
-#     return render(request, "create_test.html", context)
+
+
 
 #
+@login_required
 def create_test_view(request):
-    question_formset = modelformset_factory(Questions,
-                                            fields=('question', 'correct_answer', 'answer_1', 'answer_2', 'answer_3'))
+    queryset = Questions.objects.all()
+    QuestionsFormSet = modelformset_factory(Questions,
+                                            form=CreateQuestionForm, extra=1)
     if request.method == 'POST':
-        # question_form = question_formset(request.POST)
+        question_form = QuestionsFormSet(request.POST, queryset=queryset)
         test_form = CreateTestForm(request.POST)
-        if test_form.is_valid():
-            print(test_form.cleaned_data)
-            test = test_form.save(commit=False)
-            test.owner = request.user
-            test.category = Categories.objects.first()
-
+        if test_form.is_valid() and question_form.is_valid():
+            print('прошло')
+            # print(test_form.cleaned_data)
             # print(question_form.cleaned_data)
+            test = test_form.save(commit=False)
+            questions = question_form.save(commit=False)
+            test.owner = request.user
+            if not test.category:
+                test.category = Categories.objects.get(name='No category')
+            questions[0].test = test
+            print('test: ', test)
+            print('questions.test: ', questions[0].test)
+            print('questions: ', questions)
+            test.save()
+            questions[0].save()
         else:
             print('не прошло')
 
     test_form = CreateTestForm()
-    question_form = question_formset()
+    question_form = QuestionsFormSet(queryset=queryset)
     context = {'test_form': test_form, 'question_form': question_form}
     return render(request, "create_test.html", context)

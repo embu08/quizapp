@@ -23,13 +23,19 @@ class CreateTestForm(forms.ModelForm):
         model = Test
         fields = ['name', 'owner', 'category']
 
-#
-# class CreateQuestionForm(forms.Form):
-#     question = forms.CharField(label='Question',
-#                                widget=forms.TextInput(attrs={'class': ''}))
-#     correct_answer = forms.CharField(label='Correct answer',
-#                                      widget=forms.TextInput(attrs={'class': ''}))
-#
-#     # class Meta:
-#     #     model = Questions
-#     #     fields = ['question', 'correct_answer']
+
+class CreateQuestionForm(forms.ModelForm):
+    question = forms.CharField(label='Question',
+                               widget=forms.TextInput(attrs={'class': ''}))
+    correct_answer = forms.CharField(label='Correct answer',
+                                     widget=forms.TextInput(attrs={'class': ''}))
+    answer_1 = forms.CharField(label='Answer',
+                               widget=forms.TextInput(attrs={'class': ''}))
+    answer_2 = forms.CharField(label='Answer',
+                               widget=forms.TextInput(attrs={'class': ''}))
+    answer_3 = forms.CharField(label='Answer',
+                               widget=forms.TextInput(attrs={'class': ''}))
+
+    class Meta:
+        model = Questions
+        fields = ['question', 'correct_answer', 'answer_1', 'answer_2', 'answer_3', 'test']

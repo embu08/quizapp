@@ -3,19 +3,45 @@
 {% block content %}
 <form action="" method="POST" class="card">
     {% csrf_token %}
-    {{ test_form.non_field_errors }}
-    {{ question_form.non_field_errors }}
-    <div class="card-header">
-        {% for tf in test_form %}
-        {{ tf.label }}
-        {{ tf }}
-        {{ tf.errors }}
+
+        {{ question_form.management_form }}
+        {{ question_form.non_form_errors.as_ul }}
+        <div class="card-header">
+            {{ test_form.name.label }}
+            {{ test_form.name }}
+            {{ test_form.name.errors }}
+
+            {{ test_form.category.label }}
+            {{ test_form.category }}
+            {{ test_form.category.errors }}
+        </div>
+
+    <div class="card-body">{% for form in question_form.forms %}
+<!--        {% if forloop.first %}-->
+
+<!--        {% for field in form.visible_fields %}-->
+<!--            {{ field.label|capfirst }}-->
+<!--        {% endfor %}-->
+
+<!--        {% endif %}-->
+
+        {% for field in form.visible_fields %}
+
+            {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+            {% if field.label != 'Test' %}
+                {{ field.errors.as_ul }}
+                {{ field.label }}
+                {{ field }}
+            {% endif %}
+
         {% endfor %}
     </div>
 
-    <div class="card-body">
-        {{ question_form.as_p }}
-    </div>
+        {% endfor %}
+
+
 
     <div class="card-footer">
         <button type="submit">Add a question</button>
