@@ -4,14 +4,16 @@ from .models import *
 
 class CategoriesAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
+    list_display_links = ('name',)
 
 
 class TestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'description', 'category', 'owner')
+    list_display = ('id', 'name', 'description', 'category', 'owner', 'time_create', 'time_update')
+    fields = ('name', 'description', 'category')
     list_display_links = ('name',)
-    search_fields = ('name', 'owner', 'description')
-    list_filter = ('category', 'owner')
-    readonly_fields = ('owner',)
+    search_fields = ('name', 'owner', 'description', 'time_create')
+    list_filter = ('category', 'owner', 'time_create')
+    readonly_fields = ('owner', 'time_create', 'time_update')
 
 
 class QuestionsAdmin(admin.ModelAdmin):

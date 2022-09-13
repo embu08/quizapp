@@ -2,64 +2,33 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.forms import modelformset_factory
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, TemplateView
 
 from .forms import *
 from .models import *
 
 
-def home(request):
-    return HttpResponse('Hello world')
+class HomeView(TemplateView):
+    template_name = 'home.html'
+    extra_context = {'title': 'Homepage'}
 
 
-class ShowAllTests(ListView):
+class ShowAllTestsListVIew(ListView):
     model = Test
-    template_name = 'show_tests.html'
+    template_name = 'show_tests_list.html'
     context_object_name = 'tests'
+    extra_context = {'title': 'Available tests'}
     paginate_by = 12
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Available tests'
-        return context
 
-    def get_queryset(self):
-        return Test.objects.all()
+def edit_test(request, pk):
+    return HttpResponse(f'updating post {pk}')
 
 
-#
+def pass_test(request, pk):
+    return HttpResponse(f'passing tess {pk}')
+
+
 @login_required
-def create_test_view(request):
-    queryset = Questions.objects.all()
-    QuestionsFormSet = modelformset_factory(Questions,
-                                            form=CreateQuestionForm, extra=0)
-    if request.method == 'POST':
-        question_form = QuestionsFormSet(request.POST, queryset=queryset)
-        test_form = CreateTestForm(request.POST)
-        if test_form.is_valid() and question_form.is_valid():
-            print('прошло')
-            # print(test_form.cleaned_data)
-            # print(question_form.cleaned_data)
-            test = test_form.save(commit=False)
-            questions = question_form.save(commit=False)
-            test.owner = request.user
-            if not test.category:
-                test.category = Categories.objects.get(name='No category')
-            questions[0].test = test
-            print('test: ', test)
-            print('questions.test: ', questions[0].test)
-            print('questions: ', questions)
-            test.save()
-            questions[0].save()
-        else:
-            print('не прошло')
-
-    test_form = CreateTestForm()
-    question_form = QuestionsFormSet(queryset=queryset)
-    context = {'test_form': test_form, 'question_form': question_form, 'title': 'Create new test'}
-    return render(request, "create_test.html", context)
-
-
-def index(request):
-    context = {'title': 'Welcome'}
-    return render(request, 'index.html', context=context)
+def create_test(request):
+    pass
