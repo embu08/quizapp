@@ -14,6 +14,7 @@ class Test(models.Model):
     name = models.CharField(max_length=255, db_index=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               null=True, blank=True, on_delete=models.CASCADE)
+    description = models.CharField(max_length=1000, db_index=True, null=True, blank=True)
     category = models.ForeignKey('Categories', blank=True, null=True, on_delete=models.PROTECT)
 
     def __str__(self):

@@ -11,11 +11,20 @@ from .models import *
 def home(request):
     return HttpResponse('Hello world')
 
+
 class ShowAllTests(ListView):
     model = Test
     template_name = 'show_tests.html'
+    context_object_name = 'tests'
+    paginate_by = 12
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Available tests'
+        return context
 
+    def get_queryset(self):
+        return Test.objects.all()
 
 
 #
