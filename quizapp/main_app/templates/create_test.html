@@ -4,48 +4,53 @@
 <form action="" method="POST" class="card">
     {% csrf_token %}
 
-        {{ question_form.management_form }}
-        {{ question_form.non_form_errors.as_ul }}
-        <div class="card-header">
-            {{ test_form.name.label }}
-            {{ test_form.name }}
-            {{ test_form.name.errors }}
+    {{ question_form.management_form }}
+    {{ question_form.non_form_errors.as_ul }}
 
-            {{ test_form.category.label }}
-            {{ test_form.category }}
-            {{ test_form.category.errors }}
-        </div>
+    <div class="card-header d-flex align-items-center bg-info p-4 border-bottom border-dark"
+         style="--bs-bg-opacity: .2;">
+        {{ test_form.name }}
+        {{ test_form.name.errors }}
 
-    <div class="card-body">{% for form in question_form.forms %}
-<!--        {% if forloop.first %}-->
+        {{ test_form.category }}
+        {{ test_form.category.errors }}
 
-<!--        {% for field in form.visible_fields %}-->
-<!--            {{ field.label|capfirst }}-->
-<!--        {% endfor %}-->
+        {{ test_form.description }}
+        {{ test_form.description.errors }}
 
-<!--        {% endif %}-->
+    </div>
 
-        {% for field in form.visible_fields %}
+    <div class="card-body d-grid bg-info m-0 p-4" style="--bs-bg-opacity: .2;">
+        {% for form in question_form.forms %}
+
+        <div class="card p-4 mt-5"> {% for field in form.visible_fields %}
 
             {% for hidden in form.hidden_fields %}
-                {{ hidden }}
+            {{ hidden }}
             {% endfor %}
             {% if field.label != 'Test' %}
-                {{ field.errors.as_ul }}
-                {{ field.label }}
-                {{ field }}
+
+            <div class="row">
+                <div class="col-2 py-2">
+                    {{ field.label }}
+                </div>
+                <div class="col-10 py-2">
+                    {{ field }}
+                    {{ field.errors.as_ul }}
+                </div>
+            </div>
+
             {% endif %}
 
+            {% endfor %}
+        </div>
         {% endfor %}
     </div>
 
-        {% endfor %}
 
-
-
-    <div class="card-footer">
-        <button type="submit">Add a question</button>
-        <a href="/">Finish</a>
+    <div class="card-footer text-center">
+        <button type="submit" class="btn btn-outline-dark">Add a question</button>
+        <a href="/" class="btn btn-outline-dark">Finish</a>
     </div>
 </form>
 

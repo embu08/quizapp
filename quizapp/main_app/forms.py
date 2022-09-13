@@ -16,25 +16,34 @@ class ContactForm(forms.Form):
 
 
 class CreateTestForm(forms.ModelForm):
-    name = forms.CharField(label='Test title',
-                           widget=forms.TextInput(attrs={'class': ''}))
+    name = forms.CharField(label='',
+                           widget=forms.TextInput(attrs={'class': 'form-control',
+                                                         'placeholder': 'Title...'}))
+    description = forms.CharField(label='',
+                                  widget=forms.Textarea(attrs={'rows': '1', 'class': 'form-control',
+                                                               'placeholder': 'Description...'}))
+    category = forms.SelectMultiple()
 
     class Meta:
         model = Test
-        fields = ['name', 'owner', 'category']
+        fields = ['name', 'owner', 'category', 'description']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].widget.attrs['class'] = 'form-select'
 
 
 class CreateQuestionForm(forms.ModelForm):
     question = forms.CharField(label='Question',
-                               widget=forms.TextInput(attrs={'class': ''}))
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
     correct_answer = forms.CharField(label='Correct answer',
-                                     widget=forms.TextInput(attrs={'class': ''}))
-    answer_1 = forms.CharField(label='Answer',
-                               widget=forms.TextInput(attrs={'class': ''}))
-    answer_2 = forms.CharField(label='Answer',
-                               widget=forms.TextInput(attrs={'class': ''}))
-    answer_3 = forms.CharField(label='Answer',
-                               widget=forms.TextInput(attrs={'class': ''}))
+                                     widget=forms.TextInput(attrs={'class': 'form-control'}))
+    answer_1 = forms.CharField(label='Wrong answer 1',
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
+    answer_2 = forms.CharField(label='Wrong answer 2',
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
+    answer_3 = forms.CharField(label='Wrong answer 3',
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Questions

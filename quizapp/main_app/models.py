@@ -18,7 +18,7 @@ class Test(models.Model):
     category = models.ForeignKey('Categories', blank=True, null=True, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f'name: {self.name}, category: {self.category}, owner: {self.owner}'
+        return self.name
 
 
 class Questions(models.Model):
@@ -30,7 +30,7 @@ class Questions(models.Model):
     test = models.ForeignKey('Test', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return f'question: {self.question}, correct_answer: {self.correct_answer}'
+        return self.question
 
 
 class PassedTests(models.Model):

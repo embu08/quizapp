@@ -32,7 +32,7 @@ class ShowAllTests(ListView):
 def create_test_view(request):
     queryset = Questions.objects.all()
     QuestionsFormSet = modelformset_factory(Questions,
-                                            form=CreateQuestionForm, extra=1)
+                                            form=CreateQuestionForm, extra=0)
     if request.method == 'POST':
         question_form = QuestionsFormSet(request.POST, queryset=queryset)
         test_form = CreateTestForm(request.POST)
@@ -56,5 +56,10 @@ def create_test_view(request):
 
     test_form = CreateTestForm()
     question_form = QuestionsFormSet(queryset=queryset)
-    context = {'test_form': test_form, 'question_form': question_form}
+    context = {'test_form': test_form, 'question_form': question_form, 'title': 'Create new test'}
     return render(request, "create_test.html", context)
+
+
+def index(request):
+    context = {'title': 'Welcome'}
+    return render(request, 'index.html', context=context)
