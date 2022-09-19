@@ -38,11 +38,25 @@ class CreateTestForm(forms.ModelForm):
         self.fields['is_public'].widget.attrs['class'] = 'form-check-input'
 
 
+class UpdateTestForm(forms.ModelForm):
+    name = forms.CharField(max_length=255, widget=forms.TextInput({'class': 'form-control'}))
+    description = forms.CharField(max_length=255, widget=forms.Textarea({'class': 'form-control', 'rows': '3'}))
+
+    class Meta:
+        model = Test
+        fields = ('name', 'description', 'is_public', 'category')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['is_public'].widget.attrs['class'] = 'form-check-input'
+        self.fields['category'].widget.attrs['class'] = 'form-select'
+
+
 TestQuestionsFormset = inlineformset_factory(Test,
                                              Questions,
                                              fields=('question', 'correct_answer', 'answer_1',
                                                      'answer_2', 'answer_3'),
-                                             extra=5,
-                                             max_num=5,
+                                             extra=10,
+                                             max_num=50,
                                              can_delete_extra=False,
                                              formset=InlineFormSet)

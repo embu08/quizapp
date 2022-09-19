@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.forms import modelformset_factory
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, TemplateView, DetailView, FormView
+from django.views.generic import CreateView, ListView, TemplateView, DetailView, FormView, UpdateView
 from django.contrib import messages
 from django.views.generic.detail import SingleObjectMixin
 
@@ -48,8 +48,27 @@ class AddTestView(LoginRequiredMixin, CreateView):
             messages.SUCCESS,
             'The test has been added.'
         )
-
         return super().form_valid(form)
+
+
+class UpdateTestView(UpdateView):
+    model = Test
+    form_class = UpdateTestForm
+    template_name = 'test_edit.html'
+    context_object_name = 'update_fields'
+
+    def form_valid(self, form):
+        form.save()
+        print('cat', '*' * 100)
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            'Changes were saved.'
+        )
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('tests:test_detail', kwargs={'pk': self.object.pk})
 
 
 class TestDetailView(DetailView):

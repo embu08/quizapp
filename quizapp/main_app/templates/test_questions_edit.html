@@ -7,7 +7,8 @@
 
 <form action="" method="post" enctype="multipart/form-data">
     <div class="pb-2 text-end">
-        <button type="submit" value="Uprate collection" class="btn btn-outline-secondary">Save</button>
+        <button type="submit" value="Uprate collection" class="btn btn-outline-info">Save</button>
+        <a href="{% url 'tests:test_edit' pk=test_questions.pk %}" class="btn btn-outline-primary">Edit test</a>
         <a class="btn btn-outline-dark" href="{{ test.get_absolute_url }}">Cancel</a>
     </div>
     {% for hidden in form.hidden_fields %}
@@ -58,7 +59,8 @@
 
 
     <div class="pb-2">
-        <button type="submit" value="Uprate collection" class="btn btn-outline-secondary">Save</button>
+        <button type="submit" value="Update collection" class="btn btn-outline-info">Save</button>
+        <a href="{% url 'tests:test_edit' pk=test_questions.pk %}" class="btn btn-outline-primary">Edit test</a>
         <a class="btn btn-outline-dark" href="{{ test.get_absolute_url }}">Cancel</a>
     </div>
 </form>

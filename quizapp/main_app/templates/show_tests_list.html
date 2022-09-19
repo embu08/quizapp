@@ -35,7 +35,7 @@
                     <div class="col-6 text-end">
                         {% if request.user == test.owner or request.user.is_staff %}
                         <a href="{% url 'tests:test_detail' test.pk %}"
-                           class="btn btn-outline-secondary btn-sm">Detail</a>
+                           class="btn btn-outline-primary btn-sm">Detail</a>
                         {% endif %}
                     </div>
                 </div>
