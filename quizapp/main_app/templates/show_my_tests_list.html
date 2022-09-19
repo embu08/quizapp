@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %} All available tests {% endblock %}
+{% block title %} All {{ request.user }}'s tests {% endblock %}
 {% block content %}
 
 {% if tests %}
-<h1 class="display-1 py-3">All available tests</h1>
+<h1 class="display-1 py-3 ">My tests</h1>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
 
     {% for test in tests %}
-    {% if test.is_public %}
     <div class="col">
         <div class="card">
             <div class="card-header">
@@ -22,7 +21,7 @@
             </div>
             <div class="card-body">
                 <div class="card-text py-3">
-                    {{ test.description | truncatewords:50 }}
+                    {{ test.description | truncatewords:50}}
                 </div>
             </div>
             <div class="card-footer text-muted">
@@ -34,7 +33,8 @@
                     </i>
                     <div class="col-6 text-end">
                         {% if request.user == test.owner or request.user.is_staff %}
-                        <a href="{% url 'tests:test_detail' test.pk %}"
+                        <a href="{% url 'tests:test_questions_edit' pk=test.pk %}" class="btn btn-outline-secondary btn-sm">Edit</a>
+                        <a href="{% url 'tests:test_detail' pk=test.pk %}"
                            class="btn btn-outline-secondary btn-sm">Detail</a>
                         {% endif %}
                     </div>
@@ -42,7 +42,6 @@
             </div>
         </div>
     </div>
-    {% endif %}
     {% endfor %}
 
 </div>

@@ -19,6 +19,7 @@ class Test(models.Model):
     description = models.CharField(max_length=1000, db_index=True, null=True, blank=True)
     time_create = models.DateTimeField(auto_now_add=True, verbose_name='date')
     time_update = models.DateTimeField(auto_now=True)
+    is_public = models.BooleanField(default=True)
     category = models.ForeignKey('Categories', blank=True,
                                  null=True, on_delete=models.PROTECT)
 
@@ -31,13 +32,16 @@ class Test(models.Model):
     def get_pass_url(self):
         return reverse('tests:pass', kwargs={'pk': self.pk})
 
+    def get_absolute_url(self):
+        return reverse('tests:test_detail', kwargs={'pk': self.pk})
+
 
 class Questions(models.Model):
     question = models.CharField(max_length=255, null=False, blank=False)
     correct_answer = models.CharField(max_length=255)
     answer_1 = models.CharField(max_length=255, null=True)
-    answer_2 = models.CharField(max_length=255, null=True)
-    answer_3 = models.CharField(max_length=255, null=True)
+    answer_2 = models.CharField(max_length=255, null=True, blank=True)
+    answer_3 = models.CharField(max_length=255, null=True, blank=True)
     test = models.ForeignKey('Test', on_delete=models.CASCADE, null=False, blank=False,
                              related_name='question_test')
 

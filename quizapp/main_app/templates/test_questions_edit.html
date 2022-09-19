@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Editing questions{% endblock %}
+{% block content %}
+<h1 class="display-1 py-3">Edit questions to test <br>"{{ test_questions.name }}"</h1>
+
+
+<form action="" method="post" enctype="multipart/form-data">
+    <div class="pb-2 text-end">
+        <button type="submit" value="Uprate collection" class="btn btn-outline-secondary">Save</button>
+        <a class="btn btn-outline-dark" href="{{ test.get_absolute_url }}">Cancel</a>
+    </div>
+    {% for hidden in form.hidden_fields %}
+    {{ hidden.errors }}
+    {{ hidden }}
+    {% endfor %}
+
+    {% csrf_token %}
+
+    {{ form.management_form }}
+    {{ form.non_form_errors }}
+
+    {% for question in form.forms %}
+
+    <!--    {% if question.instance.id %}-->
+    <!--    Question: {{ question.instance.question | title }}-->
+    <!--    {% endif %}-->
+
+    {% for hidden_fields in question.hidden_fields %}
+    {{ hidden_fields.errors }}
+    {% endfor %}
+    <span class="input-group-text mb-1 bg-light">Question #{{ forloop.counter }}</span>
+    <div class="mb-3">
+        {% for field in question %}
+        <div class="row m-0">
+            {% if field.label == 'Delete' %}
+            <div class="input-group-text d-flex justify-content-between col-2">{{ field.label }}
+                <div class="p-0">{{ field }}</div>
+            </div>
+            {% elif field.label == 'Id' or field.label == 'Test' %}
+            {{ field }}
+            {% else %}
+            <div class="input-group-text d-flex align-items-stretch col-2 mb-1">{{ field.label }}</div>
+            <div class="col-10">{{ field }}</div>
+            {% if field.errors %}
+            <div class="col-2"></div>
+            <div class="bg-danger col-10 mb-1 rounded p-0">{{ field.errors }}</div>
+            {% endif %}
+            {% endif %}
+        </div>
+
+
+        {% endfor %}
+    </div>
+
+
+    {% endfor %}
+
+
+    <div class="pb-2">
+        <button type="submit" value="Uprate collection" class="btn btn-outline-secondary">Save</button>
+        <a class="btn btn-outline-dark" href="{{ test.get_absolute_url }}">Cancel</a>
+    </div>
+</form>
+
+
+{% endblock %}
