@@ -12,8 +12,13 @@
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <div class="card-title fs-3"><a href="{{ test.get_pass_url }}" class="link-dark"
+                {% if request.user != test.owner %}
+                <div class="card-title fs-3"><a href="{% url 'tests:pass_test' test.pk %}" class="link-dark"
                                                 style="text-decoration:none">{{ test.name | title }}</a></div>
+                {% else %}
+                <div class="card-title fs-3"><a href="{% url 'tests:test_detail' test.pk %}" class="link-dark"
+                                                style="text-decoration:none">{{ test.name | title }}</a></div>
+                {% endif %}
                 <div class="card-subtitle fs-6">
                     {% if test.category %}
                     <i>{{ test.category }}</i>
@@ -33,9 +38,13 @@
                         {% endif %}
                     </i>
                     <div class="col-6 text-end">
+                        {% if request.user == test.owner %}
+                        <a href="{% url 'tests:pass_test' test.pk %}"
+                           class="btn btn-outline-info btn-sm">Pass</a>
+                        {% endif %}
                         {% if request.user == test.owner or request.user.is_staff %}
                         <a href="{% url 'tests:test_detail' test.pk %}"
-                           class="btn btn-outline-primary btn-sm">Detail</a>
+                           class="btn btn-outline-info btn-sm">Detail</a>
                         {% endif %}
                     </div>
                 </div>

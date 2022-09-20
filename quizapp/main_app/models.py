@@ -37,7 +37,7 @@ class Test(models.Model):
 
 
 class Questions(models.Model):
-    question = models.CharField(max_length=255, null=False, blank=False)
+    question = models.CharField(max_length=255, null=False, blank=False, unique=True)
     correct_answer = models.CharField(max_length=255)
     answer_1 = models.CharField(max_length=255, null=True)
     answer_2 = models.CharField(max_length=255, null=True, blank=True)

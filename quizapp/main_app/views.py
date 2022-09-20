@@ -107,4 +107,19 @@ class TestQuestionsEditView(SingleObjectMixin, FormView):
 
 
 def pass_test(request, pk):
-    return HttpResponse(f'passing tess {pk}')
+    questions = Questions.objects.filter(test=pk).all()
+    if request.method == 'POST':
+        correct, total = 0, len(questions)
+        for q in questions:
+            if q.correct_answer == request.POST.get(q.question):
+                correct += 1
+        result = round(correct / total, 2) * 100
+        context = {
+            'result': result,
+            'time': request.POST.get('timer'),
+            'correct': correct,
+            'total': total
+        }
+        return render(request, 'result.html', context)
+    context = {'questions': questions}
+    return render(request, 'pass_test.html', context)

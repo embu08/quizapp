@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Passing the test{% endblock %}
+{% block content %}
+<p>you scored {{ result }} out of 100 possible points in {{ time }} sec.</p>
+<p>Total questions: {{ total }}</p>
+<p>Correct answers: {{ correct }}</p>
+
+{% endblock %}
