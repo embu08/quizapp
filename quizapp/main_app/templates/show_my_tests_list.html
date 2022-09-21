@@ -13,10 +13,21 @@
             <div class="card-header">
                 <div class="card-title fs-3"><a href="{% url 'tests:test_detail' pk=test.pk %}" class="link-dark"
                                                 style="text-decoration:none">{{ test.name | title }}</a></div>
+
+                <div class="card-subtitle fs-6 mb-2">
+                    {% if not test.is_public %}
+                    [PRIVATE]
+                    {% else %}
+                    [PUBLIC}
+                    {% endif %}
+                </div>
                 <div class="card-subtitle fs-6">
                     {% if test.category %}
                     <i>{{ test.category }}</i>
                     {% endif %}
+                </div>
+                <div class="card-subtitle fs-6">
+                    <i class="text-secondary">{{ questions|get_item:test.pk }} questions</i>
                 </div>
             </div>
             <div class="card-body">

@@ -8,9 +8,11 @@
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
 
     {% for test in tests %}
-    {% if test.is_public %}
+    {% load template_filters %}
+    {% if test.is_public and questions|get_item:test.pk != 0 %}
     <div class="col">
         <div class="card">
+
             <div class="card-header">
                 {% if request.user != test.owner %}
                 <div class="card-title fs-3"><a href="{% url 'tests:pass_test' test.pk %}" class="link-dark"
@@ -24,12 +26,17 @@
                     <i>{{ test.category }}</i>
                     {% endif %}
                 </div>
+                <div class="card-subtitle fs-6">
+                    <i class="text-secondary">{{ questions|get_item:test.pk }} questions</i>
+                </div>
             </div>
+
             <div class="card-body">
                 <div class="card-text py-3">
                     {{ test.description | truncatewords:50 }}
                 </div>
             </div>
+
             <div class="card-footer text-muted">
                 <div class="row">
                     <i class="col-6">
@@ -38,17 +45,16 @@
                         {% endif %}
                     </i>
                     <div class="col-6 text-end">
-                        {% if request.user == test.owner %}
                         <a href="{% url 'tests:pass_test' test.pk %}"
                            class="btn btn-outline-info btn-sm">Pass</a>
-                        {% endif %}
                         {% if request.user == test.owner or request.user.is_staff %}
                         <a href="{% url 'tests:test_detail' test.pk %}"
-                           class="btn btn-outline-info btn-sm">Detail</a>
+                           class="btn btn-outline-primary btn-sm">Detail</a>
                         {% endif %}
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
     {% endif %}

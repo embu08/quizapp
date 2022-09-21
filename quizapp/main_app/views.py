@@ -23,8 +23,16 @@ class ShowAllTestsListVIew(ListView):
     paginate_by = 12
     ordering = ['-time_create', ]
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        questions = {}
+        for t in context['object_list']:
+            questions[t.pk] = Questions.objects.filter(test=t.pk).count()
+        context['questions'] = questions
+        return context
 
-class ShowMyTestsListVIew(ListView):
+
+class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
     model = Test
     template_name = 'show_my_tests_list.html'
     context_object_name = 'tests'
@@ -33,6 +41,14 @@ class ShowMyTestsListVIew(ListView):
 
     def get_queryset(self):
         return Test.objects.filter(owner=self.request.user).all().order_by('-time_create')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        questions = {}
+        for t in context['object_list']:
+            questions[t.pk] = Questions.objects.filter(test=t.pk).count()
+        context['questions'] = questions
+        return context
 
 
 class AddTestView(LoginRequiredMixin, CreateView):
@@ -51,7 +67,7 @@ class AddTestView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class UpdateTestView(UpdateView):
+class UpdateTestView(LoginRequiredMixin, UpdateView):
     model = Test
     form_class = UpdateTestForm
     template_name = 'test_edit.html'
@@ -71,13 +87,13 @@ class UpdateTestView(UpdateView):
         return reverse('tests:test_detail', kwargs={'pk': self.object.pk})
 
 
-class TestDetailView(DetailView):
+class TestDetailView(LoginRequiredMixin, DetailView):
     model = Test
     template_name = 'test_detail.html'
     context_object_name = 'details'
 
 
-class TestQuestionsEditView(SingleObjectMixin, FormView):
+class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
     model = Questions
     template_name = 'test_questions_edit.html'
     context_object_name = 'test_questions'
