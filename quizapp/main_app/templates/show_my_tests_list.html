@@ -16,9 +16,9 @@
 
                 <div class="card-subtitle fs-6 mb-2">
                     {% if not test.is_public %}
-                    [PRIVATE]
+                    <div class="text-danger">[PRIVATE]</div>
                     {% else %}
-                    [PUBLIC}
+                    <div class="text-success">[PUBLIC}</div>
                     {% endif %}
                 </div>
                 <div class="card-subtitle fs-6">

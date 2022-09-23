@@ -9,21 +9,23 @@ from . import InlineFormSet
 
 class ContactForm(forms.Form):
     name = forms.CharField(label='Username',
-                           widget=forms.TextInput(attrs={'class': ''}))
+                           widget=forms.TextInput(attrs={'class': ''}), min_length=1, max_length=255)
     email = forms.EmailField(label='Email',
-                             widget=forms.TextInput(attrs={'class': ''}))
+                             widget=forms.TextInput(attrs={'class': ''}), min_length=1, max_length=255)
     content = forms.CharField(label='Content',
-                              widget=forms.TextInput(attrs={'class': ''}))
+                              widget=forms.TextInput(attrs={'class': ''}), min_length=1, max_length=1000)
     # captcha
 
 
 class CreateTestForm(forms.ModelForm):
     name = forms.CharField(label='Test name',
                            widget=forms.TextInput(attrs={'class': 'form-control',
-                                                         'placeholder': 'enter the test name here...'}))
+                                                         'placeholder': 'enter the test name here...'}),
+                           min_length=1, max_length=255)
     description = forms.CharField(label='Description',
                                   widget=forms.Textarea(attrs={'rows': '3', 'class': 'form-control',
-                                                               'placeholder': 'enter the test description...'}))
+                                                               'placeholder': 'enter the test description...'}),
+                                  max_length=1000)
 
     class Meta:
         model = Test
@@ -39,8 +41,8 @@ class CreateTestForm(forms.ModelForm):
 
 
 class UpdateTestForm(forms.ModelForm):
-    name = forms.CharField(max_length=255, widget=forms.TextInput({'class': 'form-control'}))
-    description = forms.CharField(max_length=255, widget=forms.Textarea({'class': 'form-control', 'rows': '3'}))
+    name = forms.CharField(max_length=255, widget=forms.TextInput({'class': 'form-control'}), min_length=1)
+    description = forms.CharField(max_length=1000, widget=forms.Textarea({'class': 'form-control', 'rows': '3'}))
 
     class Meta:
         model = Test

@@ -9,5 +9,6 @@ class InlineFormSet(forms.BaseInlineFormSet):
                 if name == 'DELETE':
                     form.fields[name].widget.attrs.update({'class': 'form-check-input'})
                 else:
-                    form.fields[name].widget.attrs.update({'placeholder': f'enter the {name.replace("_", " ")} here...'})
+                    form.fields[name].widget.attrs.update(
+                        {'placeholder': f'enter the {name.replace("_", " ")} here...'})
                     form.fields[name].widget.attrs.update({'class': 'form-control'})

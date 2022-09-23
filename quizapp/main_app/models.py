@@ -1,4 +1,5 @@
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, IntegrityError
 from django.urls import reverse
 
 from quizapp import settings
@@ -37,7 +38,7 @@ class Test(models.Model):
 
 
 class Questions(models.Model):
-    question = models.CharField(max_length=255, null=False, blank=False, unique=True)
+    question = models.CharField(max_length=255, null=False, blank=False)
     correct_answer = models.CharField(max_length=255)
     answer_1 = models.CharField(max_length=255, null=True)
     answer_2 = models.CharField(max_length=255, null=True, blank=True)
@@ -47,6 +48,12 @@ class Questions(models.Model):
 
     def __str__(self):
         return self.question
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['test_id', 'question'], name='unique_questions',
+                                    violation_error_message='The question is already in the test.', )
+        ]
 
 
 class PassedTests(models.Model):

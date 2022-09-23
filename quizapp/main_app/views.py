@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.forms import modelformset_factory
 from django.urls import reverse_lazy
+from django.utils.safestring import mark_safe
 from django.views.generic import CreateView, ListView, TemplateView, DetailView, FormView, UpdateView
 from django.contrib import messages
 from django.views.generic.detail import SingleObjectMixin
@@ -118,8 +119,22 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
         )
         return HttpResponseRedirect(self.get_success_url())
 
-    def get_success_url(self):
-        return reverse('tests:test_detail', kwargs={'pk': self.object.pk})
+    def form_invalid(self, form):
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            'Something wrong with questions.'
+        )
+        for n, v in enumerate(form.errors):
+            msg = '<ul class="errorlist nonfield"><li>This question is already in this test.</li></ul>'
+            if v:
+                if v['__all__']:
+                    form.errors[n]['__all__'] = mark_safe(msg)
+        return super().form_invalid(form)
+
+
+def get_success_url(self):
+    return reverse('tests:test_detail', kwargs={'pk': self.object.pk})
 
 
 def pass_test(request, pk):
