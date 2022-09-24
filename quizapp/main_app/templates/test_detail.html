@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ details.name }} {% endblock %}
+{% block title %}{{ details.name | title }} {% endblock %}
 {% block content %}
 {% if messages %}
 
@@ -24,7 +24,10 @@
 <h2 class="text-secondary display-5"><i>{{ details.category }}</i></h2>
 {% endif %}
 <p class="text-secondary"><i>Updated: {{ details.time_update | date:"d-m-Y H:i"}}</i></p>
-<span class="pb-3">Description: {{ details.description }}</span>
+<div class="card pb-3">
+    <div class="card-header fs-3">Description</div>
+    <div class="card-body">{{ details.description }}</div>
+</div>
 
 {% for question in details.question_test.all %}
 <div class="card my-2">
@@ -58,7 +61,7 @@
     <span class="text-secondary fs-4"><i>by {{ details.owner }}</i></span>
     <div>
         <a href="{% url 'tests:test_questions_edit' pk=details.pk %}" class="btn btn-outline-info">Edit
-        questions</a>
+            questions</a>
         <a href="{% url 'tests:test_edit' pk=details.pk %}" class="btn btn-outline-primary">Edit test</a>
     </div>
 </div>

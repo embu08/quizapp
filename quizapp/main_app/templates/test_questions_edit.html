@@ -38,10 +38,6 @@
 
     {% for question in form.forms %}
 
-    {% if question.instance.id %}
-    Question: {{ question.instance.question | title }}
-    {% endif %}
-
     {% if question.non_field_errors %}
     <div class="bg-danger col-12 mb-1 rounded pt-3 pb-1 m-0">{{ question.non_field_errors }}</div>
     {% endif %}

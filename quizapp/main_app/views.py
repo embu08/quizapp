@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from django.views.generic import CreateView, ListView, TemplateView, DetailView, FormView, UpdateView
 from django.contrib import messages
 from django.views.generic.detail import SingleObjectMixin
+from random import shuffle
 
 from .forms import *
 from .models import *
@@ -132,13 +133,14 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
                     form.errors[n]['__all__'] = mark_safe(msg)
         return super().form_invalid(form)
 
-
-def get_success_url(self):
-    return reverse('tests:test_detail', kwargs={'pk': self.object.pk})
+    def get_success_url(self):
+        return reverse('tests:test_detail', kwargs={'pk': self.object.pk})
 
 
 def pass_test(request, pk):
-    questions = Questions.objects.filter(test=pk).all()
+    questions = Questions.objects.filter(test=pk)
+
+    # processing the result
     if request.method == 'POST':
         correct, total = 0, len(questions)
         for q in questions:
@@ -152,5 +154,14 @@ def pass_test(request, pk):
             'total': total
         }
         return render(request, 'result.html', context)
+
+    # this is the questions
+    answers = {}
+    for q in questions:
+        a = [q.correct_answer, q.answer_1, q.answer_2, q.answer_3]
+        shuffle(a)
+        answers[q.question] = a
+    print(answers)
+
     context = {'questions': questions}
     return render(request, 'pass_test.html', context)

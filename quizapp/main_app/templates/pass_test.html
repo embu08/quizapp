@@ -3,48 +3,55 @@
 {% block title %}Passing the test{% endblock %}
 {% block content %}
 
-<h1 class="display-1 py-3">{{ questions.first.test }}</h1>
+<h1 class="display-1 py-3">{{ questions.first.test | title }}</h1>
 <div class="text-end" id="displaytimer"><b>Timer: 0 seconds</b></div>
 
 <form method='post' action=''>
     {% csrf_token %}
     {% for q in questions%}
-    <div class="form-group">
-        <label for="question">{{ q.question }} ?</label>
-    </div>
-    <div class="form-check">
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="{{q.question}}" id="gridRadios1"
-                   value="{{ q.correct_answer }}" checked>
-            <label class="form-check-label" for="gridRadios1">
-                {{ q.correct_answer }}
-            </label>
+    <div class="mb-2">
+        <div class="input-group-text mb-1 bg-light">
+            {{ forloop.counter }}) {{ q.question | title }} ?
         </div>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="{{q.question}}" id="gridRadios2"
-                   value="{{ q.answer_1 }}">
-            <label class="form-check-label" for="gridRadios2">
-                {{ q.answer_1 }}
-            </label>
+        <div class="form-check card py-2">
+
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="{{q.question}}" id="a1_{{ q.id }}"
+                       value="{{ q.correct_answer }}" checked>
+                <label class="form-check-label" for="a1_{{ q.id }}">
+                    {{ q.correct_answer }}
+                </label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="{{q.question}}" id="a2_{{ q.id }}"
+                       value="{{ q.answer_1 }}">
+                <label class="form-check-label" for="a2_{{ q.id }}">
+                    {{ q.answer_1 }}
+                </label>
+            </div>
+
+            {% if q.answer_2 %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="{{q.question}}" id="a3_{{ q.id }}"
+                       value="{{ q.answer_2 }}">
+                <label class="form-check-label" for="a3_{{ q.id }}">
+                    {{ q.answer_2 }}
+                </label>
+            </div>
+            {% endif %}
+
+            {% if q.answer_3 %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="{{q.question}}" id="a4_{{ q.id }}"
+                       value="{{ q.answer_3 }}">
+                <label class="form-check-label" for="a4_{{ q.id }}">
+                    {{ q.answer_3 }}
+                </label>
+            </div>
+            {% endif %}
+
         </div>
-        {% if q.answer_2 %}
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="{{q.question}}" id="gridRadios1"
-                   value="{{ q.answer_2 }}">
-            <label class="form-check-label" for="gridRadios1">
-                {{ q.answer_2 }}
-            </label>
-        </div>
-        {% endif %}
-        {% if q.answer_3 %}
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="{{q.question}}" id="gridRadios2"
-                   value="{{ q.answer_3 }}">
-            <label class="form-check-label" for="gridRadios2">
-                {{ q.answer_3 }}
-            </label>
-        </div>
-        {% endif %}
     </div>
     {% endfor %}
     <input id='timer' type='hidden' name="timer" value="">
