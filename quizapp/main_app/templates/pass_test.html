@@ -4,12 +4,13 @@
 {% block content %}
 
 <h1 class="display-1 py-3">{{ questions.first.test | title }}</h1>
-<div class="text-end" id="displaytimer"><b>Timer: 0 seconds</b></div>
+<div class="text-end text-secondary" id="displaytimer"><i>0 seconds</i></div>
 
 <form method='post' action=''>
     {% csrf_token %}
     {% for q in questions%}
     <div class="mb-2">
+
         <div class="input-group-text mb-1 bg-light">
             {{ forloop.counter }}) {{ q.question | title }} ?
         </div>
@@ -17,36 +18,36 @@
 
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="{{q.question}}" id="a1_{{ q.id }}"
-                       value="{{ q.correct_answer }}" checked>
+                       value="{{ answers|get_item:q.question|get_list_item:0 }}" checked>
                 <label class="form-check-label" for="a1_{{ q.id }}">
-                    {{ q.correct_answer }}
+                    {{ answers|get_item:q.question|get_list_item:0 }}
                 </label>
             </div>
 
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="{{q.question}}" id="a2_{{ q.id }}"
-                       value="{{ q.answer_1 }}">
+                       value="{{ answers|get_item:q.question|get_list_item:1 }}">
                 <label class="form-check-label" for="a2_{{ q.id }}">
-                    {{ q.answer_1 }}
+                    {{ answers|get_item:q.question|get_list_item:1 }}
                 </label>
             </div>
 
-            {% if q.answer_2 %}
+            {% if len_a|get_list_item:forloop.counter0 > 2 %}
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="{{q.question}}" id="a3_{{ q.id }}"
-                       value="{{ q.answer_2 }}">
+                       value="{{ answers|get_item:q.question|get_list_item:2 }}">
                 <label class="form-check-label" for="a3_{{ q.id }}">
-                    {{ q.answer_2 }}
+                    {{ answers|get_item:q.question|get_list_item:2 }}
                 </label>
             </div>
             {% endif %}
 
-            {% if q.answer_3 %}
+            {% if len_a|get_list_item:forloop.counter0 > 3 %}
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="{{q.question}}" id="a4_{{ q.id }}"
-                       value="{{ q.answer_3 }}">
+                       value="{{ answers|get_item:q.question|get_list_item:3 }}">
                 <label class="form-check-label" for="a4_{{ q.id }}">
-                    {{ q.answer_3 }}
+                    {{ answers|get_item:q.question|get_list_item:3 }}
                 </label>
             </div>
             {% endif %}
@@ -68,12 +69,9 @@
             t=0
             setInterval(()=>{
                 t+=1
-                timer.innerHTML ="<b>Timer: " +t+" seconds</b>"
+                timer.innerHTML ="<i>"+t+" seconds</b>"
                 inputtag.value = t
             },1000)
-
-
-
 </script>
 {% endblock script %}
 

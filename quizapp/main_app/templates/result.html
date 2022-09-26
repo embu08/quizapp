@@ -1,9 +1,46 @@
 {% extends 'base.html' %}
 
-{% block title %}Passing the test{% endblock %}
+{% block title %}Results{% endblock %}
 {% block content %}
-<p>you scored {{ result }} out of 100 possible points in {{ time }} sec.</p>
-<p>Total questions: {{ total }}</p>
-<p>Correct answers: {{ correct }}</p>
+<div class="display-1 py-3">You scored {{ result }} out of 100 points.</div>
+<i class="text-secondary fs-4">in {{ time }} sec.</i>
+{% for q in questions %}
+
+<div class="my-3">
+    <div class="row m-0 mb-1">
+        <div class="input-group-text d-flex align-items-stretch col-2 bg-white">Question</div>
+        <div class="col-10">
+            <div class="form-control">{{ q.question }}</div>
+        </div>
+    </div>
+
+    <div class="row m-0 mb-1">
+        <div class="input-group-text d-flex align-items-stretch col-2">Your answer</div>
+        <div class="col-10">
+
+            {% if ans|get_list_item:forloop.counter0 == cor_ans|get_list_item:forloop.counter0 %}
+            <div class="form-control bg-success" style="--bs-bg-opacity: .5;">
+                {{ ans|get_list_item:forloop.counter0 }}
+            </div>
+            {% else %}
+            <div class="form-control bg-danger">
+                {{ ans|get_list_item:forloop.counter0 }}
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+    <div class="row m-0 mb-1">
+        <div class="input-group-text d-flex align-items-stretch col-2">Correct answer</div>
+        <div class="col-10">
+            <div class="form-control">{{ cor_ans|get_list_item:forloop.counter0 }}</div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<hr>
+
+<span>Total questions: {{ total }} <br>
+    Correct answers: {{ correct }}</span>
 
 {% endblock %}

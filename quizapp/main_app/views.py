@@ -143,25 +143,36 @@ def pass_test(request, pk):
     # processing the result
     if request.method == 'POST':
         correct, total = 0, len(questions)
+        cor_ans, ans = [], []
         for q in questions:
+            cor_ans.append(q.correct_answer)
+            ans.append(request.POST.get(q.question))
             if q.correct_answer == request.POST.get(q.question):
                 correct += 1
-        result = round(correct / total, 2) * 100
+        result = int(round(correct / total, 2) * 100)
+        print(cor_ans, ans)
         context = {
             'result': result,
             'time': request.POST.get('timer'),
             'correct': correct,
-            'total': total
+            'total': total,
+            'cor_ans': cor_ans,
+            'ans': ans,
+            'questions': questions,
         }
         return render(request, 'result.html', context)
 
-    # this is the questions
+    # this is the questionsvalues_list
     answers = {}
+    len_a = []
     for q in questions:
-        a = [q.correct_answer, q.answer_1, q.answer_2, q.answer_3]
+        a = []
+        for i in [q.correct_answer, q.answer_1, q.answer_2, q.answer_3]:
+            if i:
+                a.append(i)
         shuffle(a)
+        len_a.append(len(a))
         answers[q.question] = a
-    print(answers)
 
-    context = {'questions': questions}
+    context = {'questions': questions, 'answers': answers, 'len_a': len_a}
     return render(request, 'pass_test.html', context)
