@@ -22,7 +22,7 @@ class ShowAllTestsListVIew(ListView):
     model = Test
     template_name = 'show_tests_list.html'
     context_object_name = 'tests'
-    paginate_by = 2
+    paginate_by = 12
     ordering = ['-time_create', ]
 
     def get_context_data(self, *args, **kwargs):
@@ -33,12 +33,18 @@ class ShowAllTestsListVIew(ListView):
         context['questions'] = questions
         return context
 
+    def get_queryset(self):
+        tests_with_questions = []
+        for q in Questions.objects.values_list('test').distinct():
+            tests_with_questions.append(*q)
+        return Test.objects.filter(pk__in=tests_with_questions, is_public=True)
+
 
 class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
     model = Test
     template_name = 'show_my_tests_list.html'
     context_object_name = 'tests'
-    paginate_by = 2
+    paginate_by = 12
     ordering = ['-time_create', ]
 
     def get_queryset(self):
