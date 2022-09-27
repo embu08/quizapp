@@ -14,11 +14,18 @@
                 <div class="card-title fs-3"><a href="{% url 'tests:test_detail' pk=test.pk %}" class="link-dark"
                                                 style="text-decoration:none">{{ test.name | title }}</a></div>
 
-                <div class="card-subtitle fs-6 mb-2">
+                <div class="card-subtitle fs-6">
                     {% if not test.is_public %}
-                    <div class="text-danger">[PRIVATE]</div>
+                    <div class="text-danger">is public: [PRIVATE]</div>
                     {% else %}
-                    <div class="text-success">[PUBLIC}</div>
+                    <div class="text-success">is public: [PUBLIC]</div>
+                    {% endif %}
+                </div>
+                <div class="card-subtitle fs-6 mb-2">
+                    {% if not test.show_results %}
+                    <div class="text-danger">results: [PRIVATE]</div>
+                    {% else %}
+                    <div class="text-success">results: [PUBLIC]</div>
                     {% endif %}
                 </div>
                 <div class="card-subtitle fs-6">
@@ -26,6 +33,8 @@
                     <i>{{ test.category }}</i>
                     {% endif %}
                 </div>
+
+
                 <div class="card-subtitle fs-6">
                     <i class="text-secondary">{{ questions|get_item:test.pk }} questions</i>
                 </div>

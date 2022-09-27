@@ -2,7 +2,7 @@
 
 {% block title %}Results{% endblock %}
 {% block content %}
-<div class="display-1 py-3">You scored {{ result }} out of 100 points</div>
+<div class="display-1 py-3">You scored {{ result }} out of {{ max_result }} points</div>
 <i class="text-secondary fs-4">in {{ time }} sec</i>
 {% if show_results %}
 {% for q in questions %}
@@ -22,6 +22,8 @@
             {% if ans|get_list_item:forloop.counter0 == cor_ans|get_list_item:forloop.counter0 %}
             <div class="form-control bg-success" style="--bs-bg-opacity: .5;">
                 {{ ans|get_list_item:forloop.counter0 }}
+                <div class="text-light">+{{q.value}} points</div>
+
             </div>
             {% else %}
             <div class="form-control bg-danger">
@@ -37,6 +39,7 @@
             <div class="form-control">{{ cor_ans|get_list_item:forloop.counter0 }}</div>
         </div>
     </div>
+
 </div>
 {% endfor %}
 {% else %}
@@ -45,6 +48,7 @@
 <hr>
 
 <span>Total questions: {{ total }} <br>
-    Correct answers: {{ correct }}</span>
+    Correct answers: {{ correct }} <br>
+    {{ correct|divide:total }}% correct answers.</span>
 
 {% endblock %}

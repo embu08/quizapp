@@ -11,8 +11,11 @@
     {% for q in questions%}
     <div class="mb-2">
 
-        <div class="input-group-text mb-1 bg-light">
+        <div class="input-group-text mb-1 bg-light d-flex justify-content-between">
             {{ forloop.counter }}) {{ q.question | title }} ?
+            {% if show_results %}
+            <div class="text-secondary"><i>{{ q.value }} points</i></div>
+            {% endif %}
         </div>
         <div class="form-check card py-2">
 
@@ -72,6 +75,7 @@
                 timer.innerHTML ="<i>"+t+" seconds</b>"
                 inputtag.value = t
             },1000)
+
 </script>
 {% endblock script %}
 

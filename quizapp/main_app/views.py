@@ -147,19 +147,22 @@ def pass_test(request, pk):
 
     # processing the result
     if request.method == 'POST':
-        correct, total = 0, len(questions)
+        correct, total_questions = 0, len(questions)
+        result, max_result = 0, 0
         cor_ans, ans = [], []
         for q in questions:
             cor_ans.append(q.correct_answer)
             ans.append(request.POST.get(q.question))
+            max_result += q.value
             if q.correct_answer == request.POST.get(q.question):
                 correct += 1
-        result = int(round(correct / total, 2) * 100)
+                result += q.value
         context = {
             'result': result,
+            'max_result': max_result,
             'time': request.POST.get('timer'),
             'correct': correct,
-            'total': total,
+            'total': total_questions,
             'cor_ans': cor_ans,
             'ans': ans,
             'questions': questions,
@@ -179,5 +182,6 @@ def pass_test(request, pk):
         len_a.append(len(a))
         answers[q.question] = a
 
-    context = {'questions': questions, 'answers': answers, 'len_a': len_a}
+    context = {'questions': questions, 'answers': answers, 'len_a': len_a,
+               'show_results': Test.objects.get(id=pk).show_results}
     return render(request, 'pass_test.html', context)

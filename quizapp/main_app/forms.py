@@ -59,7 +59,7 @@ class UpdateTestForm(forms.ModelForm):
 TestQuestionsFormset = inlineformset_factory(Test,
                                              Questions,
                                              fields=('question', 'correct_answer', 'answer_1',
-                                                     'answer_2', 'answer_3'),
+                                                     'answer_2', 'answer_3', 'value'),
                                              extra=10,
                                              max_num=50,
                                              can_delete_extra=False,

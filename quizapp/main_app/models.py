@@ -44,6 +44,7 @@ class Questions(models.Model):
     answer_1 = models.CharField(max_length=255, null=True)
     answer_2 = models.CharField(max_length=255, null=True, blank=True)
     answer_3 = models.CharField(max_length=255, null=True, blank=True)
+    value = models.IntegerField(default=1)
     test = models.ForeignKey('Test', on_delete=models.CASCADE, null=False, blank=False,
                              related_name='question_test')
 
