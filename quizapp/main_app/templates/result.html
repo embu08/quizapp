@@ -2,8 +2,9 @@
 
 {% block title %}Results{% endblock %}
 {% block content %}
-<div class="display-1 py-3">You scored {{ result }} out of 100 points.</div>
-<i class="text-secondary fs-4">in {{ time }} sec.</i>
+<div class="display-1 py-3">You scored {{ result }} out of 100 points</div>
+<i class="text-secondary fs-4">in {{ time }} sec</i>
+{% if show_results %}
 {% for q in questions %}
 
 <div class="my-3">
@@ -38,6 +39,9 @@
     </div>
 </div>
 {% endfor %}
+{% else %}
+<p class="display-5 my-3">Answers to questions are hidden by test author.</p>
+{% endif %}
 <hr>
 
 <span>Total questions: {{ total }} <br>

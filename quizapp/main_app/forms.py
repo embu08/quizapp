@@ -24,12 +24,12 @@ class CreateTestForm(forms.ModelForm):
                            min_length=1, max_length=255)
     description = forms.CharField(label='Description',
                                   widget=forms.Textarea(attrs={'rows': '3', 'class': 'form-control',
-                                                               'placeholder': 'enter the test description...'}),
+                                                               'placeholder': 'enter the test description...', }),
                                   max_length=1000)
 
     class Meta:
         model = Test
-        fields = ['name', 'category', 'description', 'is_public']
+        fields = ['name', 'category', 'description', 'is_public', 'show_results']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,6 +38,7 @@ class CreateTestForm(forms.ModelForm):
         self.fields['category'].widget.attrs['class'] = 'form-select'
         self.fields['category'].empty_label = 'Not selected'
         self.fields['is_public'].widget.attrs['class'] = 'form-check-input'
+        self.fields['show_results'].widget.attrs['class'] = 'form-check-input'
 
 
 class UpdateTestForm(forms.ModelForm):
@@ -46,11 +47,12 @@ class UpdateTestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = ('name', 'description', 'is_public', 'category')
+        fields = ('name', 'description', 'category', 'is_public', 'show_results')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['is_public'].widget.attrs['class'] = 'form-check-input'
+        self.fields['show_results'].widget.attrs['class'] = 'form-check-input'
         self.fields['category'].widget.attrs['class'] = 'form-select'
 
 

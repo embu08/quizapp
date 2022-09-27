@@ -24,6 +24,20 @@
 <h2 class="text-secondary display-5"><i>{{ details.category }}</i></h2>
 {% endif %}
 <p class="text-secondary"><i>Updated: {{ details.time_update | date:"d-m-Y H:i"}}</i></p>
+<p class="text-secondary"><i>
+    Test:
+    {% if details.is_public %}
+    public.
+    {% else %}
+    private.
+    {% endif %}
+    Results:
+    {% if details.show_results %}
+    public.
+    {% else %}
+    private.
+    {% endif %}
+</i></p>
 <div class="card pb-3">
     <div class="card-header fs-3">Description</div>
     <div class="card-body">{{ details.description }}</div>
@@ -57,7 +71,7 @@
 {% endfor %}
 
 {% if details.owner %}
-<div class="d-flex justify-content-between">
+<div class="d-flex justify-content-between my-3">
     <span class="text-secondary fs-4"><i>by {{ details.owner }}</i></span>
     <div>
         <a href="{% url 'tests:test_questions_edit' pk=details.pk %}" class="btn btn-outline-info">Edit

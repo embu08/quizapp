@@ -19,6 +19,7 @@
           right: 20px;
           display: none;
         }
+
     </style>
 </head>
 <body class="bg-info" style="--bs-bg-opacity: .1;">
@@ -78,7 +79,31 @@
     {% endblock %}
 </div>
 <!--end block main content and sidebar-->
+{% if page_obj.has_other_pages %}
+<!--Pagination-->
+<div class="container pt-5">
+    <ul class="pagination">
+        <!--        first and previous-->
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
 
+        <!--        current-->
+
+        <li class="page-item"><a href="" class="page-link disabled text-dark">{{ page_obj.number}} of
+            {{ page_obj.paginator.num_pages }}</a></li>
+
+
+        <!--        next and last-->
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
+        {% endif %}
+    </ul>
+</div>
+<!--end block pagination-->
+{% endif %}
 <script>
 //Get the button
 let mybutton = document.getElementById("btn-back-to-top");
@@ -105,6 +130,7 @@ function backToTop() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
+
 
 </script>
 </body>

@@ -21,7 +21,7 @@ class Test(models.Model):
     time_create = models.DateTimeField(auto_now_add=True, verbose_name='date')
     time_update = models.DateTimeField(auto_now=True)
     is_public = models.BooleanField(default=True)
-    show_result = models.BooleanField(default=True)
+    show_results = models.BooleanField(default=True)
     category = models.ForeignKey('Categories', blank=True,
                                  null=True, on_delete=models.PROTECT)
 

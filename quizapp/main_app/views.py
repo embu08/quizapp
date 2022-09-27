@@ -22,7 +22,7 @@ class ShowAllTestsListVIew(ListView):
     model = Test
     template_name = 'show_tests_list.html'
     context_object_name = 'tests'
-    paginate_by = 12
+    paginate_by = 2
     ordering = ['-time_create', ]
 
     def get_context_data(self, *args, **kwargs):
@@ -38,7 +38,7 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
     model = Test
     template_name = 'show_my_tests_list.html'
     context_object_name = 'tests'
-    paginate_by = 12
+    paginate_by = 2
     ordering = ['-time_create', ]
 
     def get_queryset(self):
@@ -77,7 +77,6 @@ class UpdateTestView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         form.save()
-        print('cat', '*' * 100)
         messages.add_message(
             self.request,
             messages.SUCCESS,
@@ -150,7 +149,6 @@ def pass_test(request, pk):
             if q.correct_answer == request.POST.get(q.question):
                 correct += 1
         result = int(round(correct / total, 2) * 100)
-        print(cor_ans, ans)
         context = {
             'result': result,
             'time': request.POST.get('timer'),
@@ -159,6 +157,7 @@ def pass_test(request, pk):
             'cor_ans': cor_ans,
             'ans': ans,
             'questions': questions,
+            'show_results': Test.objects.get(id=pk).show_results
         }
         return render(request, 'result.html', context)
 

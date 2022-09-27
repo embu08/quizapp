@@ -20,13 +20,14 @@
         <div class="col-2"></div>
         <div class="bg-danger col-10 mb-1 rounded p-0">{{ field.errors }}</div>
         {% endif %}
-        {% if field.label != 'Is public' %}
-        <span class="input-group-text d-flex align-items-stretch col-2">{{ field.label }}</span>
-        <div class="col-10">{{ field }}</div>
-        {% else %}
+        {% if field.label == 'Is public' or field.label == 'Show results' %}
         <div class="input-group-text d-flex justify-content-between col-2">{{ field.label }}
             <div class="p-0">{{ field }}</div>
         </div>
+
+        {% else %}
+        <span class="input-group-text d-flex align-items-stretch col-2">{{ field.label }}</span>
+        <div class="col-10">{{ field }}</div>
         {% endif %}
     </div>
 
@@ -36,7 +37,7 @@
         <a href="{% url 'tests:test_questions_edit' pk=update_fields.pk %}" class="btn btn-outline-info">Edit
             questions</a>
         <button type="submit" class="btn btn-outline-primary">Save</button>
-        <a role="button" class="btn btn-outline-dark" href="{% url 'tests:home' %}">Cancel</a>
+        <a role="button" class="btn btn-outline-dark" href="{% url 'tests:my_tests' %}">Cancel</a>
     </div>
 
 </form>
