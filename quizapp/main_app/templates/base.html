@@ -23,14 +23,17 @@
 
 
 
+
+
     </style>
 </head>
-<body class="bg-info" style="--bs-bg-opacity: .1;">
+<body class="d-flex flex-column min-vh-100" style="background-color: #FFFFFF">
+
 
 <!-- scroll up -->
 <button
         type="button"
-        class="btn btn-light btn-floating py-1 px-2 border border-white rounded"
+        class="btn btn-light btn-floating py-1 px-2 border border-secondary rounded"
         id="btn-back-to-top"
 >
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="16" fill="currentColor" class="bi bi-arrow-up"
@@ -39,13 +42,14 @@
               d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
     </svg>
 </button>
+<!--end block scroll up-->
 
 <!--navbar-->
 {% block mainmenu %}
 
 {% endblock mainmenu %}
 
-<header class="p-3 border-bottom border-dark bg-white" style="--bs-bg-opacity: .1;">
+<header class="p-3 border-bottom border-dark" style="background-color: #E6F9FD">
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
             <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-black text-decoration-none">
@@ -77,15 +81,16 @@
 </header>
 
 
-<div class="container">
+<div class="container pb-5 mb-3" style="background-color: #D8EAED">
     {% block content%}
     {% endblock %}
 </div>
 <!--end block main content and sidebar-->
-{% if page_obj.has_other_pages %}
+
 <!--Pagination-->
-<div class="container pt-5">
-    <ul class="pagination">
+{% if page_obj.has_other_pages %}
+<div class="container mb-3">
+    <ul class="pagination m-0">
         <!--        first and previous-->
         {% if page_obj.has_previous %}
         <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
@@ -111,8 +116,19 @@
         {% endif %}
     </ul>
 </div>
-<!--end block pagination-->
 {% endif %}
+<!--end block pagination-->
+
+<!--footer-->
+<footer class="mt-auto" style="background-color: #C8D8DB">
+    <div class="container ">
+        <div class="border-top p-2 border-dark">
+            <span class="fs-5">Footer</span>
+        </div>
+    </div>
+</footer>
+<!--end block footer-->
+
 <script>
 //Get the button
 let mybutton = document.getElementById("btn-back-to-top");
@@ -139,6 +155,8 @@ function backToTop() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
+
+
 
 
 
