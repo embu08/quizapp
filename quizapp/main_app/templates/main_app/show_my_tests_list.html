@@ -1,41 +1,49 @@
-{% extends 'base.html' %}
+{% extends 'main_app/base.html' %}
 
-{% block title %} All available tests {% endblock %}
+{% block title %} All {{ request.user }}'s tests {% endblock %}
 {% block content %}
 
 {% if tests %}
-<h1 class="display-1 py-3">All available tests</h1>
+<h1 class="display-1 py-3 ">My tests</h1>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
 
     {% for test in tests %}
-
     <div class="col">
         <div class="card">
-
             <div class="card-header">
-                {% if request.user != test.owner %}
-                <div class="card-title fs-3"><a href="{% url 'tests:pass_test' test.pk %}" class="link-dark"
+                <div class="card-title fs-3"><a href="{% url 'tests:test_detail' pk=test.pk %}" class="link-dark"
                                                 style="text-decoration:none">{{ test.name | title }}</a></div>
-                {% else %}
-                <div class="card-title fs-3"><a href="{% url 'tests:test_detail' test.pk %}" class="link-dark"
-                                                style="text-decoration:none">{{ test.name | title }}</a></div>
-                {% endif %}
+
+                <div class="card-subtitle fs-6">
+                    {% if not test.is_public %}
+                    <div class="text-danger">is public: [PRIVATE]</div>
+                    {% else %}
+                    <div class="text-success">is public: [PUBLIC]</div>
+                    {% endif %}
+                </div>
+                <div class="card-subtitle fs-6 mb-2">
+                    {% if not test.show_results %}
+                    <div class="text-danger">results: [PRIVATE]</div>
+                    {% else %}
+                    <div class="text-success">results: [PUBLIC]</div>
+                    {% endif %}
+                </div>
                 <div class="card-subtitle fs-6">
                     {% if test.category %}
                     <i>{{ test.category }}</i>
                     {% endif %}
                 </div>
+
+
                 <div class="card-subtitle fs-6">
                     <i class="text-secondary">{{ questions|get_item:test.pk }} questions</i>
                 </div>
             </div>
-
             <div class="card-body">
                 <div class="card-text py-3">
-                    {{ test.description | truncatewords:50 }}
+                    {{ test.description | truncatewords:50}}
                 </div>
             </div>
-
             <div class="card-footer text-muted">
                 <div class="row">
                     <i class="col-6">
@@ -44,24 +52,21 @@
                         {% endif %}
                     </i>
                     <div class="col-6 text-end">
-                        <a href="{% url 'tests:pass_test' test.pk %}"
-                           class="btn btn-outline-info btn-sm">Pass</a>
                         {% if request.user == test.owner or request.user.is_staff %}
-                        <a href="{% url 'tests:test_detail' test.pk %}"
+                        <a href="{% url 'tests:test_questions_edit' pk=test.pk %}" class="btn btn-outline-info btn-sm">Edit</a>
+                        <a href="{% url 'tests:test_detail' pk=test.pk %}"
                            class="btn btn-outline-primary btn-sm">Detail</a>
                         {% endif %}
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-
     {% endfor %}
 
 </div>
 {% else %}
-<h1>Empty :(</h1>
+<h1 class="display-1">You didn't add any tests yet :(</h1>
 {% endif %}
 
 {% endblock %}

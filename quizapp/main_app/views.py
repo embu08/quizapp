@@ -15,15 +15,14 @@ from .models import *
 
 
 class HomeView(TemplateView):
-    template_name = 'home.html'
+    template_name = 'main_app/home.html'
 
 
 class ShowAllTestsListVIew(ListView):
     model = Test
-    template_name = 'show_tests_list.html'
+    template_name = 'main_app/show_tests_list.html'
     context_object_name = 'tests'
     paginate_by = 12
-    ordering = ['-time_create', ]
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -37,18 +36,18 @@ class ShowAllTestsListVIew(ListView):
         tests_with_questions = []
         for q in Questions.objects.values_list('test').distinct():
             tests_with_questions.append(*q)
-        return Test.objects.filter(pk__in=tests_with_questions, is_public=True)
+        return Test.objects.filter(pk__in=tests_with_questions, is_public=True).order_by('-time_update')
 
 
 class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
     model = Test
-    template_name = 'show_my_tests_list.html'
+    template_name = 'main_app/show_my_tests_list.html'
     context_object_name = 'tests'
     paginate_by = 12
     ordering = ['-time_create', ]
 
     def get_queryset(self):
-        return Test.objects.filter(owner=self.request.user).all().order_by('-time_create')
+        return Test.objects.filter(owner=self.request.user).all().order_by('-time_update')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -61,7 +60,7 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
 
 class AddTestView(LoginRequiredMixin, CreateView):
     model = Test
-    template_name = 'add_test.html'
+    template_name = 'main_app/add_test.html'
     form_class = CreateTestForm
 
     def form_valid(self, form):
@@ -78,7 +77,7 @@ class AddTestView(LoginRequiredMixin, CreateView):
 class UpdateTestView(LoginRequiredMixin, UpdateView):
     model = Test
     form_class = UpdateTestForm
-    template_name = 'test_edit.html'
+    template_name = 'main_app/test_edit.html'
     context_object_name = 'update_fields'
 
     def form_valid(self, form):
@@ -96,13 +95,13 @@ class UpdateTestView(LoginRequiredMixin, UpdateView):
 
 class TestDetailView(LoginRequiredMixin, DetailView):
     model = Test
-    template_name = 'test_detail.html'
+    template_name = 'main_app/test_detail.html'
     context_object_name = 'details'
 
 
 class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
     model = Questions
-    template_name = 'test_questions_edit.html'
+    template_name = 'main_app/test_questions_edit.html'
     context_object_name = 'test_questions'
 
     def get(self, request, *args, **kwargs):
@@ -168,7 +167,7 @@ def pass_test(request, pk):
             'questions': questions,
             'show_results': Test.objects.get(id=pk).show_results
         }
-        return render(request, 'result.html', context)
+        return render(request, 'main_app/result.html', context)
 
     # this is the questionsvalues_list
     answers = {}
@@ -184,4 +183,4 @@ def pass_test(request, pk):
 
     context = {'questions': questions, 'answers': answers, 'len_a': len_a,
                'show_results': Test.objects.get(id=pk).show_results}
-    return render(request, 'pass_test.html', context)
+    return render(request, 'main_app/pass_test.html', context)

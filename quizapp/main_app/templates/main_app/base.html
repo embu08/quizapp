@@ -25,10 +25,16 @@
 
 
 
+
+
+
+
+
+
+
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100" style="background-color: #FFFFFF">
-
 
 <!-- scroll up -->
 <button
@@ -42,28 +48,23 @@
               d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
     </svg>
 </button>
-<!--end block scroll up-->
+<!-- end block scroll up -->
 
-<!--navbar-->
+<!-- navbar -->
 {% block mainmenu %}
-
-{% endblock mainmenu %}
-
-<header class="p-3 border-bottom border-dark" style="background-color: #E6F9FD">
+<header class="p-3" style="background-color: #E6F9FD">
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-black text-decoration-none">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-quora"
-                     viewBox="0 0 16 16">
-                    <path d="M8.73 12.476c-.554-1.091-1.204-2.193-2.473-2.193-.242 0-.484.04-.707.142l-.43-.863c.525-.45 1.373-.808 2.464-.808 1.697 0 2.568.818 3.26 1.86.41-.89.605-2.093.605-3.584 0-3.724-1.165-5.636-3.885-5.636-2.68 0-3.839 1.912-3.839 5.636 0 3.704 1.159 5.596 3.84 5.596.425 0 .811-.046 1.166-.15Zm.665 1.3a7.127 7.127 0 0 1-1.83.244C3.994 14.02.5 11.172.5 7.03.5 2.849 3.995 0 7.564 0c3.63 0 7.09 2.828 7.09 7.03 0 2.337-1.09 4.236-2.675 5.464.512.767 1.04 1.277 1.773 1.277.802 0 1.125-.62 1.179-1.105h1.043c.061.647-.262 3.334-3.178 3.334-1.767 0-2.7-1.024-3.4-2.224Z"/>
-                </svg>
-            </a>
-
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                {% if request.user.is_staff %}
                 <li><a href="/admin" class="nav-link px-2 text-secondary" target="_blank">Admin</a></li>
+                {% endif %}
+                <li><a href="{% url 'tests:home' %}" class="nav-link px-2 text-black">Home</a></li>
                 <li><a href="{% url 'tests:tests' %}" class="nav-link px-2 text-black">All tests</a></li>
+                {% if user.is_authenticated %}
                 <li><a href="{% url 'tests:my_tests' %}" class="nav-link px-2 text-black">My tests</a></li>
                 <li><a href="{% url 'tests:add' %}" class="nav-link px-2 text-black">Create</a></li>
+                {% endif %}
                 <li><a href="#" class="nav-link px-2 text-black">About</a></li>
             </ul>
 
@@ -73,21 +74,28 @@
             </form>
 
             <div class="text-end">
-                <button type="button" class="btn btn-outline-info">Sign-up</button>
-                <button type="button" class="btn btn-outline-primary me-2">Login</button>
+                {% if user.is_authenticated %}
+                <a class="btn btn-outline-info" href="{% url 'users:my_profile' %}">{{ request.user }}</a>
+                <a class="btn btn-outline-primary me-2" href="{% url 'users:logout' %}">Log out</a>
+                {% else %}
+                <a class="btn btn-outline-info" href="{% url 'users:sign_up' %}">Sign up</a>
+                <a class="btn btn-outline-primary me-2" href="{% url 'users:login' %}">Login</a>
+                {% endif %}
             </div>
         </div>
     </div>
 </header>
+{% endblock mainmenu %}
+<!-- end block navbar -->
 
-
+<!-- main content -->
 <div class="container pb-5 mb-3" style="background-color: #D8EAED">
     {% block content%}
     {% endblock %}
 </div>
-<!--end block main content and sidebar-->
+<!-- end block main content -->
 
-<!--Pagination-->
+<!-- pagination -->
 {% if page_obj.has_other_pages %}
 <div class="container mb-3">
     <ul class="pagination m-0">
@@ -119,15 +127,23 @@
 {% endif %}
 <!--end block pagination-->
 
-<!--footer-->
+<!-- footer -->
 <footer class="mt-auto" style="background-color: #C8D8DB">
-    <div class="container ">
-        <div class="border-top p-2 border-dark">
-            <span class="fs-5">Footer</span>
-        </div>
+    <div class="container py-2">
+        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-black text-decoration-none">
+            Qui
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                 class="bi bi-sort-alpha-down-alt" viewBox="0 0 16 16">
+                <path d="M12.96 7H9.028v-.691l2.579-3.72v-.054H9.098v-.867h3.785v.691l-2.567 3.72v.054h2.645V7z"/>
+                <path fill-rule="evenodd"
+                      d="M10.082 12.629 9.664 14H8.598l1.789-5.332h1.234L13.402 14h-1.12l-.419-1.371h-1.781zm1.57-.785L11 9.688h-.047l-.652 2.156h1.351z"/>
+                <path d="M4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293V2.5z"/>
+            </svg>
+            pp
+        </a>
     </div>
 </footer>
-<!--end block footer-->
+<!-- end block footer -->
 
 <script>
 //Get the button
@@ -155,6 +171,13 @@ function backToTop() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
+
+
+
+
+
+
+
 
 
 

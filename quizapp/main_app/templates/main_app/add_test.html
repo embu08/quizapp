@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'main_app/base.html' %}
 
 {% block title %}Add a new test{% endblock %}
 {% block content %}
@@ -34,8 +34,8 @@
     {% endfor %}
 
     <div class="p-0">
-        <button type="submit" class="btn btn-outline-primary">Save</button>
-        <a role="button" class="btn btn-outline-dark" href="{% url 'tests:home' %}">Cancel</a>
+        <button type="submit" class="btn btn-outline-info">Save</button>
+        <a role="button" class="btn btn-outline-primary" href="{% url 'tests:home' %}">Cancel</a>
     </div>
 
 </form>
