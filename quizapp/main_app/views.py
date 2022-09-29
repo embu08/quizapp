@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
@@ -12,6 +14,7 @@ from random import shuffle
 
 from .forms import *
 from .models import *
+from users.models import CustomUser
 
 
 class HomeView(TemplateView):
@@ -47,7 +50,7 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
     ordering = ['-time_create', ]
 
     def get_queryset(self):
-        return Test.objects.filter(owner=self.request.user).all().order_by('-time_update')
+        return Test.objects.filter(owner=self.request.user).order_by('-time_update')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -156,6 +159,11 @@ def pass_test(request, pk):
             if q.correct_answer == request.POST.get(q.question):
                 correct += 1
                 result += q.value
+        try:
+            PassedTests.objects.create(test=Test.objects.get(pk=pk), user=CustomUser.objects.get(pk=request.user.pk),
+                                       grade=result, max_grade=max_result)
+        except Exception as e:
+            print(f'adding PassedTest to BD error: {e}')
         context = {
             'result': result,
             'max_result': max_result,
@@ -184,3 +192,13 @@ def pass_test(request, pk):
     context = {'questions': questions, 'answers': answers, 'len_a': len_a,
                'show_results': Test.objects.get(id=pk).show_results}
     return render(request, 'main_app/pass_test.html', context)
+
+
+class PassedTestView(LoginRequiredMixin, ListView):
+    model = PassedTests
+    template_name = 'main_app/passed_tests.html'
+    context_object_name = 'passed_tests'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return PassedTests.objects.filter(user=self.request.user).order_by('-data_passed')

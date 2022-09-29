@@ -16,16 +16,17 @@
         <div class="text-center col-12 fs-4 mb-2">Created tests:</div>
         <div class="row m-0">
             {% for t in created_tests %}
-            <a class="col-6 text-center px-2 pb-2 d-flex align-items-stretch" href="{% url 'tests:test_detail' t.pk %}"
-               style="text-decoration: none">
-                <div class="btn btn-light col-12">
-                    <div class="fs-5">{{ t.name }}</div>
-                    {% if t.category %}
-                    <div class="text-secondary fs-6"><i>{{ t.category }}</i></div>
-                    {% endif %}
-                    <div class="text-secondary"><i>{{ t.time_update | date:"d-m-Y H:i"}}</i></div>
+            <div class="col-6 text-center px-2 pb-2 d-flex align-items-stretch">
+                <div class="card col-12">
+                    <div class="card-body text-dark">
+                        <a class="fs-5 text-dark" href="{% url 'tests:test_detail' t.pk %}" style="text-decoration: none">{{ t.name }}</a>
+                        {% if t.category %}
+                        <div class="text-secondary fs-6"><i>{{ t.category }}</i></div>
+                        {% endif %}
+                        <div class="text-secondary"><i>{{ t.time_update | date:"d-m-Y H:i"}}</i></div>
+                    </div>
                 </div>
-            </a>
+            </div>
             {% endfor %}
             <a href="{% url 'tests:my_tests' %}" class="col-12 btn btn-light">more...</a>
         </div>
@@ -34,19 +35,19 @@
     <div class="col-6">
         <div class="text-center col-12 fs-4 mb-2">Passed tests:</div>
         <div class="row m-0">
-            {% for t in created_tests %}
-            <a class="col-6 text-center px-2 pb-2 d-flex align-items-stretch" href="{% url 'tests:test_detail' t.pk %}"
-               style="text-decoration: none">
-                <div class="btn btn-light col-12">
-                    <div class="fs-5">{{ t.name }}</div>
-                    {% if t.category %}
-                    <div class="text-secondary fs-6"><i>{{ t.category }}</i></div>
-                    {% endif %}
-                    <div class="text-secondary"><i>{{ t.time_update | date:"d-m-Y H:i"}}</i></div>
+            {% for t in passed_tests %}
+            <div class="col-6 text-center px-2 pb-2 d-flex align-items-stretch"
+                 style="text-decoration: none">
+                <div class="card col-12">
+                    <div class="card-body">
+                        <div class="fs-5">{{ t.test }}</div>
+                        <div class="text-secondary fs-6"><i>{{ t.grade }} / {{ t.max_grade }}</i></div>
+                        <div class="text-secondary"><i>{{ t.data_passed | date:"d-m-Y H:i"}}</i></div>
+                    </div>
                 </div>
-            </a>
+            </div>
             {% endfor %}
-            <a href="{% url 'tests:my_tests' %}" class="col-12 btn btn-light">more...</a>
+            <a href="{% url 'tests:passed_tests' %}" class="col-12 btn btn-light">more...</a>
         </div>
     </div>
 </div>

@@ -1,0 +1,36 @@
+{% extends 'main_app/base.html' %}
+
+{% block title %} My passed tests {% endblock %}
+{% block content %}
+
+{% if passed_tests %}
+<h1 class="display-1 py-3 ">My passed tests</h1>
+<div class="row m-0">
+    {% for t in passed_tests %}
+    <div class="p-2 col-3">
+        <div class="card">
+            <div class="card-header row m-0">
+                <div class="col-4 border-end border-dark">Test name</div>
+                <div class="col-8">{{ t.test }}</div>
+            </div>
+            <ul class="card-body">
+                <li class="row m-0">
+                    <div class="col-4 border-end border-dark">Grade:</div>
+                    <div class="col-8">{{ t.grade }} / {{ t.max_grade }}</div>
+                </li>
+                <li class="row m-0">
+                    <div class="col-4 border-end border-dark">Date</div>
+                    <div class="col-8">{{ t.data_passed | date:"d-m-Y H:i" }}</div>
+                </li>
+            </ul>
+            <a href="{% url 'tests:pass_test' t.test.pk %}" class='btn btn-outline-dark btn-sm mx-2 mb-2'>Try
+                again</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<h1 class="display-1">You haven't passed any tests yet</h1>
+{% endif %}
+
+{% endblock %}

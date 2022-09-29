@@ -53,6 +53,7 @@ class MyProfileView(DetailView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['created_tests'] = Test.objects.filter(owner=self.request.user.pk).order_by('-time_update')[:6]
+        context['passed_tests'] = PassedTests.objects.filter(user=self.request.user.pk).order_by('-data_passed')[:6]
         return context
 
 

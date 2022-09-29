@@ -32,6 +32,11 @@
 
 
 
+
+
+
+
+
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100" style="background-color: #FFFFFF">
@@ -63,9 +68,9 @@
                 <li><a href="{% url 'tests:tests' %}" class="nav-link px-2 text-black">All tests</a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'tests:my_tests' %}" class="nav-link px-2 text-black">My tests</a></li>
-                <li><a href="{% url 'tests:add' %}" class="nav-link px-2 text-black">Create</a></li>
+                <li><a href="{% url 'tests:passed_tests' %}" class="nav-link px-2 text-black">Passed</a></li>
+                <li><a href="{% url 'tests:add' %}" class="nav-link px-2 text-black">Add</a></li>
                 {% endif %}
-                <li><a href="#" class="nav-link px-2 text-black">About</a></li>
             </ul>
 
             <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
@@ -75,7 +80,7 @@
 
             <div class="text-end">
                 {% if user.is_authenticated %}
-                <a class="btn btn-outline-info" href="{% url 'users:my_profile' request.user.pk %}">{{ request.user }}</a>
+                <a class="btn btn-outline-info" href="{% url 'users:my_profile' request.user.pk %}">{{request.user}}</a>
                 <a class="btn btn-outline-primary me-2" href="{% url 'users:logout' %}">Log out</a>
                 {% else %}
                 <a class="btn btn-outline-info" href="{% url 'users:sign_up' %}">Sign up</a>
@@ -129,7 +134,7 @@
 
 <!-- footer -->
 <footer class="mt-auto" style="background-color: #C8D8DB">
-    <div class="container py-2">
+    <div class="container py-2 d-flex justify-content-between">
         <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-black text-decoration-none">
             Qui
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -141,6 +146,7 @@
             </svg>
             pp
         </a>
+        <a href="#" class="nav-link px-2 text-black">About</a>
     </div>
 </footer>
 <!-- end block footer -->
@@ -171,6 +177,11 @@ function backToTop() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
+
+
+
+
+
 
 
 
