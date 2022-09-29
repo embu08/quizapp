@@ -1,11 +1,14 @@
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
+
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, UpdateView, DetailView
 
 from users.forms import LoginUserForm, RegisterUserForm, UpdateUserForm
+from users.models import CustomUser
+
+from main_app.models import Test, PassedTests
 
 
 class RegisterUser(CreateView):
@@ -44,8 +47,13 @@ class UpdateUserView(UpdateView):
 
 
 class MyProfileView(DetailView):
-    model = User
+    model = CustomUser
     template_name = 'users/user_detail.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['created_tests'] = Test.objects.filter(owner=self.request.user.pk).order_by('-time_update')[:6]
+        return context
 
 
 def logout_user(request):

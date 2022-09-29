@@ -1,0 +1,54 @@
+{% extends 'main_app/base.html' %}
+
+
+{% block title %}{{ request.user }} - My profile{% endblock %}
+{% block content %}
+<h1 class="display-1">{{ request.user }}</h1>
+<div>First name: {{ request.user.first_name }}</div>
+<div>Last name: {{ request.user.last_name }}</div>
+<div>Email: {{ request.user.email }}</div>
+
+<div>Joined: {{ request.user.date_joined | date:"d-m-Y H:i" }}</div>
+<a href="#" class="btn btn-outline-info">Change password</a>
+
+<div class="row">
+    <div class="col-6">
+        <div class="text-center col-12 fs-4 mb-2">Created tests:</div>
+        <div class="row m-0">
+            {% for t in created_tests %}
+            <a class="col-6 text-center px-2 pb-2 d-flex align-items-stretch" href="{% url 'tests:test_detail' t.pk %}"
+               style="text-decoration: none">
+                <div class="btn btn-light col-12">
+                    <div class="fs-5">{{ t.name }}</div>
+                    {% if t.category %}
+                    <div class="text-secondary fs-6"><i>{{ t.category }}</i></div>
+                    {% endif %}
+                    <div class="text-secondary"><i>{{ t.time_update | date:"d-m-Y H:i"}}</i></div>
+                </div>
+            </a>
+            {% endfor %}
+            <a href="{% url 'tests:my_tests' %}" class="col-12 btn btn-light">more...</a>
+        </div>
+    </div>
+
+    <div class="col-6">
+        <div class="text-center col-12 fs-4 mb-2">Passed tests:</div>
+        <div class="row m-0">
+            {% for t in created_tests %}
+            <a class="col-6 text-center px-2 pb-2 d-flex align-items-stretch" href="{% url 'tests:test_detail' t.pk %}"
+               style="text-decoration: none">
+                <div class="btn btn-light col-12">
+                    <div class="fs-5">{{ t.name }}</div>
+                    {% if t.category %}
+                    <div class="text-secondary fs-6"><i>{{ t.category }}</i></div>
+                    {% endif %}
+                    <div class="text-secondary"><i>{{ t.time_update | date:"d-m-Y H:i"}}</i></div>
+                </div>
+            </a>
+            {% endfor %}
+            <a href="{% url 'tests:my_tests' %}" class="col-12 btn btn-light">more...</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

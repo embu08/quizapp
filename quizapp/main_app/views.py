@@ -144,7 +144,7 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
 def pass_test(request, pk):
     questions = Questions.objects.filter(test=pk)
 
-    # processing the result
+    # for result
     if request.method == 'POST':
         correct, total_questions = 0, len(questions)
         result, max_result = 0, 0
@@ -169,7 +169,7 @@ def pass_test(request, pk):
         }
         return render(request, 'main_app/result.html', context)
 
-    # this is the questionsvalues_list
+    # for test
     answers = {}
     len_a = []
     for q in questions:
