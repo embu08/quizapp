@@ -1,6 +1,10 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
+{% if request.user.is_authenticated %}
 <h1 class="display-1 py-3">hi {{ request.user }}</h1>
+{% else %}
+<h1 class="display-1 py-3">hi</h1>
+{% endif %}
 
 {% endblock %}

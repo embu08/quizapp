@@ -2,7 +2,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, UpdateView, DetailView
 
 from users.forms import LoginUserForm, RegisterUserForm, UpdateUserForm
@@ -22,9 +22,17 @@ class RegisterUser(CreateView):
 class LoginUser(LoginView):
     form_class = LoginUserForm
     template_name = 'users/login.html'
+    redirect_authenticated_user = True
 
     def get_success_url(self):
         return reverse_lazy('tests:home')
+
+    def form_valid(self, form):
+        print(self.request.session.get_session_cookie_age())
+        if not form.cleaned_data['remember_me']:
+            self.request.session.set_expiry(0)
+            self.request.session.modified = True
+        return super(LoginUser, self).form_valid(form)
 
 
 class UpdateUserView(UpdateView):

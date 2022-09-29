@@ -23,10 +23,8 @@ class LoginUserForm(AuthenticationForm):
                                widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label='Password',
                                widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-
-    class Meta:
-        model = CustomUser
-        fields = ('username', 'password')
+    remember_me = forms.BooleanField(required=False,
+                                     widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
 
 class UpdateUserForm(UserChangeForm):
