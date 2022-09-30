@@ -1,6 +1,9 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, UpdateView, DetailView
@@ -38,15 +41,16 @@ class LoginUser(LoginView):
         return super(LoginUser, self).form_valid(form)
 
 
-class UpdateUserView(UpdateView):
-    form_class = UpdateUserForm
+class UpdateUserView(LoginRequiredMixin, UpdateView):
     template_name = 'users/update_user.html'
+    form_class = UpdateUserForm
+    model = CustomUser
 
     def get_success_url(self):
-        return reverse_lazy('tests:home')
+        return reverse_lazy('users:my_profile', kwargs={'pk': self.request.user.pk})
 
 
-class MyProfileView(DetailView):
+class MyProfileView(LoginRequiredMixin, DetailView):
     model = CustomUser
     template_name = 'users/user_detail.html'
 
@@ -60,3 +64,22 @@ class MyProfileView(DetailView):
 def logout_user(request):
     logout(request)
     return redirect('users:login')
+
+
+class ChangePasswordView(PasswordChangeView):
+    template_name = 'users/password_change.html'
+
+    def get_success_url(self):
+        return reverse_lazy('users:my_profile', kwargs={'pk': self.request.user.pk})
+
+    def form_valid(self, form):
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            'Password has been successfully changed'
+        )
+        form.save()
+        # Updating the password logs out all other sessions for the user
+        # except the current one.
+        update_session_auth_hash(self.request, form.user)
+        return super().form_valid(form)
