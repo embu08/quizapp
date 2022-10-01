@@ -2,8 +2,14 @@
 
 {% block title %}Add a new test{% endblock %}
 {% block content %}
+{% if not request.user.email_confirmed %}
+<div class="bg-warning text-dark p-1">
+    <span class="fs-3">
+       Please verify your email address. Your user rights are limited
+    </span>
+</div>
+{% else %}
 <h1 class="display-1 py-3">Add a new test</h1>
-
 <form method="post">
     {% for hidden_field in form.hidden_fields %}
     {{ hidden_field.errors }}
@@ -39,6 +45,7 @@
     </div>
 
 </form>
+{% endif %}
 
 
 {% endblock %}

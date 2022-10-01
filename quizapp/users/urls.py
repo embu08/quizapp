@@ -11,6 +11,7 @@ urlpatterns = [
     path('<int:pk>/my-profile/', MyProfileView.as_view(), name='my_profile'),
     path('<int:pk>/my-profile/update/', UpdateUserView.as_view(), name='my_profile_update'),
     path('<int:pk>/my-profile/password-change/', ChangePasswordView.as_view(), name='password_change'),
+    path('activate/<uidb64>/<token>', activate, name='activate')
 
 
     # password reset

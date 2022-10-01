@@ -4,14 +4,48 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 
 from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.utils.safestring import mark_safe
 from django.views.generic import CreateView, UpdateView, DetailView
+from django.core.mail import EmailMessage
 
 from users.forms import LoginUserForm, RegisterUserForm, UpdateUserForm
 from users.models import CustomUser
 
 from main_app.models import Test, PassedTests
+
+from .tokens import account_activation_token
+
+
+def activate(request, uidb64, token):
+    CustomUser.objects.filter(pk=request.user.pk).update(email_confirmed=True)
+    messages.add_message(request, messages.SUCCESS,
+                         f'Your email was successfully confirmed!')
+    return redirect('tests:home')
+
+
+def activate_email(request, user, to_email):
+    mail_subject = 'Activate your user account.'
+    message = render_to_string('users/template_activate_account.html', {
+        'user': user.username,
+        'domain': get_current_site(request).domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+        'protocol': 'https' if request.is_secure() else 'http',
+    })
+    email = EmailMessage(mail_subject, message, to=[to_email])
+    if email.send():
+        messages.add_message(request, messages.SUCCESS,
+                             mark_safe(f'Welcome to Quizapp. <br> Dear <b>{user}</b>, we sent activation link to your '
+                                       f'email <b>{email}</b>, please click on it to confirm and complete registration.'))
+    else:
+        messages.add_message(request, messages.ERROR,
+                             f'Problem sending email to {to_email}, check if you type it correctly')
 
 
 class RegisterUser(CreateView):
@@ -22,6 +56,7 @@ class RegisterUser(CreateView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
+        activate_email(self.request, self.request.user, form.cleaned_data.get('email'))
         return redirect('tests:home')
 
 

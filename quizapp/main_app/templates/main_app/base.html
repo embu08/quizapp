@@ -91,7 +91,7 @@
                 {% endif %}
                 <li><a href="{% url 'tests:home' %}" class="nav-link px-2 text-black">Home</a></li>
                 <li><a href="{% url 'tests:tests' %}" class="nav-link px-2 text-black">All tests</a></li>
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated and user.email_confirmed %}
                 <li><a href="{% url 'tests:add' %}" class="nav-link px-2 text-black">Add</a></li>
                 {% endif %}
             </ul>
