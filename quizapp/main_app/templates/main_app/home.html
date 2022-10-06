@@ -2,19 +2,6 @@
 
 {% block content %}
 
-{% if messages %}
-
-<div class="bg-warning text-dark p-1">
-    {% for msg in messages %}
-    <span class="fs-3">
-        {{ msg }}
-    </span>
-    {% endfor %}
-</div>
-
-{% endif %}
-
-
 {% if request.user.is_authenticated %}
 {% if not request.user.email_confirmed and not messages  %}
 <div class="bg-warning text-dark p-1">

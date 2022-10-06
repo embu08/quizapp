@@ -17,7 +17,7 @@
             <div class="input-group-text d-flex align-items-stretch col-2 mb-1">{{ f.label }}</div>
             <div class="col-5">{{ f }}</div>
             {% if f.errors %}
-            <div class="bg-danger col-7 mb-1 rounded p-0 text-center">{{ f.errors }}</div>
+            <div class="bg-danger col-7 mb-1 rounded p-0 text-center d-flex align-items-center">{{ f.errors }}</div>
             {% endif %}
         </div>
         {% endfor %}

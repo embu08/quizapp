@@ -6,7 +6,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{% block title %}Homepage{% endblock %}</title>
+    <title>{% block title %}Homepage{% endblock %} | Quizapp</title>
     <!-- CSS only -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
@@ -20,6 +20,7 @@
           right: 20px;
           display: none;
         }
+
 
 
 
@@ -129,6 +130,20 @@
 {% endblock mainmenu %}
 <!-- end block navbar -->
 
+<!-- messages -->
+{% if messages %}
+
+<div class="bg-warning text-dark p-1 ">
+    {% for msg in messages %}
+    <span class="fs-3">
+        {{ msg }}
+    </span>
+    {% endfor %}
+</div>
+
+{% endif %}
+<!-- end block messages -->
+
 <!-- main content -->
 <div class="container pb-5 mb-3" style="background-color: #D8EAED">
     {% block content%}
@@ -213,6 +228,7 @@ function backToTop() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
+
 
 
 
