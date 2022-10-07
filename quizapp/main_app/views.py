@@ -127,7 +127,7 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
     def form_invalid(self, form):
         messages.add_message(
             self.request,
-            messages.SUCCESS,
+            messages.ERROR,
             'Something wrong with questions.'
         )
         for n, v in enumerate(form.errors):

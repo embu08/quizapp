@@ -1,6 +1,6 @@
 {% autoescape off %}
 Hi {{ user.username }},
-Please click on the link below to confirm your registration:
+Please click on the link below to complete verification of your email:
 
 {{ protocol }}://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}
 

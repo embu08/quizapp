@@ -56,6 +56,9 @@
 
 
 
+
+
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
             integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
@@ -133,13 +136,22 @@
 <!-- messages -->
 {% if messages %}
 
-<div class="bg-warning text-dark p-1 ">
-    {% for msg in messages %}
+{% for msg in messages %}
+{% if msg.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+<div class="text-dark p-1 text-center bg-info">
     <span class="fs-3">
         {{ msg }}
     </span>
-    {% endfor %}
 </div>
+{% endif %}
+{% if msg.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+<div class="text-dark p-1 text-center bg-danger">
+    <span class="fs-3">
+        {{ msg }}
+    </span>
+</div>
+{% endif %}
+{% endfor %}
 
 {% endif %}
 <!-- end block messages -->
@@ -228,6 +240,9 @@ function backToTop() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
+
+
+
 
 
 

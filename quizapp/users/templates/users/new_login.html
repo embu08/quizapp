@@ -1,9 +1,8 @@
 {% extends 'main_app/base.html' %}
 
 
-{% block title %}Log in{% endblock %}
+{% block title %}Authentication{% endblock %}
 {% block content %}
-
 <h1 class="display-1 py-3 text-center">Please log in</h1>
 <form action="" method="post">
     {% csrf_token %}

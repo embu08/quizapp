@@ -1,7 +1,7 @@
 from django.contrib.auth import login, logout, update_session_auth_hash, get_user_model
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib import messages
+from django.contrib import messages, auth
 
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetConfirmView
 from django.contrib.sites.shortcuts import get_current_site
@@ -43,6 +43,10 @@ def activate(request, uidb64, token):
 
 
 def activate_email(request, user, to_email):
+    return_in_the_end = False
+    if type(user) == str:
+        user = CustomUser.objects.get(pk=request.user.pk)
+        return_in_the_end = True
     mail_subject = 'Activate your user account.'
     message = render_to_string('users/template_activate_account.html', {
         'user': user.username,
@@ -54,11 +58,13 @@ def activate_email(request, user, to_email):
     email = EmailMessage(mail_subject, message, to=[to_email])
     if email.send():
         messages.add_message(request, messages.SUCCESS,
-                             mark_safe(f'Welcome to Quizapp. <br> Dear <b>{user}</b>, we sent activation link to your '
+                             mark_safe(f'Dear <b>{user}</b>, we sent activation link to your '
                                        f'email <b>{email}</b>, please click on it to confirm and complete registration.'))
     else:
         messages.add_message(request, messages.ERROR,
-                             f'Problem sending email to {to_email}, check if you type it correctly')
+                             f'Problem sending email to {to_email}, check if you type it correctly!')
+    if return_in_the_end:
+        return redirect('tests:home')
 
 
 class RegisterUser(CreateView):
@@ -73,20 +79,29 @@ class RegisterUser(CreateView):
         return redirect('tests:home')
 
 
-class LoginUser(LoginView):
-    form_class = LoginUserForm
-    template_name = 'users/login.html'
-    redirect_authenticated_user = True
-
-    def get_success_url(self):
-        return reverse_lazy('tests:home')
-
-    def form_valid(self, form):
-        print(self.request.session.get_session_cookie_age())
-        if not form.cleaned_data['remember_me']:
-            self.request.session.set_expiry(0)
-            self.request.session.modified = True
-        return super(LoginUser, self).form_valid(form)
+def login(request):
+    form = LoginUserForm
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        try:
+            user = auth.authenticate(username=CustomUser.objects.get(email=username), password=password)
+        except:
+            user = auth.authenticate(username=username, password=password)
+        if user is not None:
+            auth.login(request, user)
+            if not request.POST.get('remember_me'):
+                request.session.set_expiry(0)
+                request.session.modified = True
+            messages.add_message(request, messages.SUCCESS,
+                                 f'You have successfully logged in.')
+            return redirect('tests:home')
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 f'Please enter a correct username and password. '
+                                 f'Note that both fields may be case-sensitive.')
+    context = {'form': form}
+    return render(request, 'users/new_login.html', context=context)
 
 
 class UpdateUserView(LoginRequiredMixin, UpdateView):
@@ -124,7 +139,7 @@ class ChangePasswordView(PasswordChangeView):
         messages.add_message(
             self.request,
             messages.SUCCESS,
-            'Password has been successfully changed'
+            'Password has been successfully changed!'
         )
         form.save()
         # Updating the password logs out all other sessions for the user

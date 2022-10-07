@@ -58,6 +58,9 @@
 
     <a href="{% url 'users:my_profile_update' request.user.pk %}" class="btn btn-light rounded mb-1">Edit user data</a>
     <a href="{% url 'users:password_change' request.user.pk %}" class="btn btn-light rounded">Change password</a>
+    {% if not request.user.email_confirmed %}
+    <a href="{% url 'users:email_verification' request.user request.user.email %}" class="btn btn-light rounded mt-1">Send email verification again</a>
+    {% endif %}
 </div>
 
 
