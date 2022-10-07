@@ -11,7 +11,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.safestring import mark_safe
-from django.views.generic import CreateView, UpdateView, DetailView
+from django.views.generic import CreateView, UpdateView, DetailView, TemplateView
 from django.core.mail import EmailMessage
 
 from users.forms import LoginUserForm, RegisterUserForm, UpdateUserForm, PasswordResetFormCustom, SetPasswordFormCustom
@@ -79,7 +79,7 @@ class RegisterUser(CreateView):
         return redirect('tests:home')
 
 
-def login(request):
+def login_user(request):
     form = LoginUserForm
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -107,18 +107,20 @@ def login(request):
 class UpdateUserView(LoginRequiredMixin, UpdateView):
     template_name = 'users/update_user.html'
     form_class = UpdateUserForm
-    model = CustomUser
 
     def get_success_url(self):
-        return reverse_lazy('users:my_profile', kwargs={'pk': self.request.user.pk})
+        return reverse_lazy('users:my_profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user
 
 
-class MyProfileView(LoginRequiredMixin, DetailView):
-    model = CustomUser
+class MyProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'users/user_detail.html'
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['user_data'] = CustomUser.objects.get(pk=self.request.user.pk)
         context['created_tests'] = Test.objects.filter(owner=self.request.user.pk).order_by('-time_update')[:6]
         context['passed_tests'] = PassedTests.objects.filter(user=self.request.user.pk).order_by('-data_passed')[:6]
         return context
@@ -133,7 +135,7 @@ class ChangePasswordView(PasswordChangeView):
     template_name = 'users/password_change.html'
 
     def get_success_url(self):
-        return reverse_lazy('users:my_profile', kwargs={'pk': self.request.user.pk})
+        return reverse_lazy('users:my_profile')
 
     def form_valid(self, form):
         messages.add_message(

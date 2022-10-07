@@ -1,35 +1,35 @@
 {% extends 'main_app/base.html' %}
 
 
-{% block title %}{{ request.user }} - My profile{% endblock %}
+{% block title %}{{ user_data.username }} - My profile{% endblock %}
 {% block content %}
 
-<h1 class="display-1 py-3">{{ request.user }}</h1>
+<h1 class="display-1 py-3">{{ user_data.username }}</h1>
 
 <div class="row m-0 mb-3">
-    {% if request.user.first_name %}
+    {% if user_data.first_name %}
     <div class="pb-1 row">
         <div class="col-2">
             <div class="input-group-text rounded">First name</div>
         </div>
-        <div class="col-10 input-group-text bg-light rounded">{{ request.user.first_name }}</div>
+        <div class="col-10 input-group-text bg-light rounded">{{ user_data.first_name }}</div>
     </div>
     {% endif %}
 
-    {% if request.user.last_name %}
+    {% if user_data.last_name %}
     <div class="pb-1 row">
         <div class="col-2">
             <div class="input-group-text rounded">Last name</div>
         </div>
-        <div class="col-10 input-group-text bg-light rounded">{{ request.user.last_name }}</div>
+        <div class="col-10 input-group-text bg-light rounded">{{ user_data.last_name }}</div>
     </div>
     {% endif %}
 
-    {% if request.user.email %}
+    {% if user_data.email %}
     <div class="pb-1 row">
         <div class="col-2">
             <div class="input-group-text rounded d-flex justify-content-between">Email
-                <div> {% if request.user.email_confirmed %}
+                <div> {% if user_data.email_confirmed %}
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green"
                          class="bi bi-check2-all" viewBox="0 0 16 16">
                         <path d="M12.354 4.354a.5.5 0 0 0-.708-.708L5 10.293 1.854 7.146a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0l7-7zm-4.208 7-.896-.897.707-.707.543.543 6.646-6.647a.5.5 0 0 1 .708.708l-7 7a.5.5 0 0 1-.708 0z"/>
@@ -44,7 +44,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-10 input-group-text bg-light rounded">{{ request.user.email }}</div>
+        <div class="col-10 input-group-text bg-light rounded">{{ user_data.email }}</div>
     </div>
     {% endif %}
 
@@ -52,14 +52,14 @@
         <div class="col-2">
             <div class="input-group-text rounded">Joined</div>
         </div>
-        <div class="col-10 input-group-text bg-light rounded">{{ request.user.date_joined | date:"d-m-Y H:i" }}
+        <div class="col-10 input-group-text bg-light rounded">{{ user_data.date_joined | date:"d-m-Y H:i" }}
         </div>
     </div>
 
-    <a href="{% url 'users:my_profile_update' request.user.pk %}" class="btn btn-light rounded mb-1">Edit user data</a>
-    <a href="{% url 'users:password_change' request.user.pk %}" class="btn btn-light rounded">Change password</a>
-    {% if not request.user.email_confirmed %}
-    <a href="{% url 'users:email_verification' request.user request.user.email %}" class="btn btn-light rounded mt-1">Send email verification again</a>
+    <a href="{% url 'users:my_profile_update' %}" class="btn btn-light rounded mb-1">Edit user data</a>
+    <a href="{% url 'users:password_change' %}" class="btn btn-light rounded">Change password</a>
+    {% if not user_data.email_confirmed %}
+    <a href="{% url 'users:email_verification' user_data.username user_data.email %}" class="btn btn-light rounded mt-1">Send email verification again</a>
     {% endif %}
 </div>
 
