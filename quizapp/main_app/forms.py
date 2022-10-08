@@ -29,7 +29,7 @@ class CreateTestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = ['name', 'category', 'description', 'is_public', 'show_results']
+        fields = ['name', 'category', 'description', 'is_public', 'show_results', 'access_by_link']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,6 +39,7 @@ class CreateTestForm(forms.ModelForm):
         self.fields['category'].empty_label = 'Not selected'
         self.fields['is_public'].widget.attrs['class'] = 'form-check-input'
         self.fields['show_results'].widget.attrs['class'] = 'form-check-input'
+        self.fields['access_by_link'].widget.attrs['class'] = 'form-check-input'
 
 
 class UpdateTestForm(forms.ModelForm):
@@ -47,12 +48,13 @@ class UpdateTestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = ('name', 'description', 'category', 'is_public', 'show_results')
+        fields = ('name', 'description', 'category', 'is_public', 'show_results', 'access_by_link')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['is_public'].widget.attrs['class'] = 'form-check-input'
         self.fields['show_results'].widget.attrs['class'] = 'form-check-input'
+        self.fields['access_by_link'].widget.attrs['class'] = 'form-check-input'
         self.fields['category'].widget.attrs['class'] = 'form-select'
 
 

@@ -1,8 +1,6 @@
-from datetime import datetime
-
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
 from django.utils.safestring import mark_safe
 from django.views.generic import CreateView, ListView, TemplateView, DetailView, FormView, UpdateView
 from django.contrib import messages
@@ -92,11 +90,34 @@ class UpdateTestView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse('tests:test_detail', kwargs={'pk': self.object.pk})
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.owner != self.request.user:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                'You are not owner of the test.'
+            )
+            return redirect('tests:home')
+        return super().get(request, *args, **kwargs)
+
 
 class TestDetailView(LoginRequiredMixin, DetailView):
     model = Test
     template_name = 'main_app/test_detail.html'
     context_object_name = 'details'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.owner != self.request.user:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                'You are not owner of the test.'
+            )
+            return redirect('tests:home')
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
 
 class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
@@ -106,6 +127,13 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Test.objects.all())
+        if self.object.owner != self.request.user:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                'You are not owner of the test.'
+            )
+            return redirect('tests:home')
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -133,7 +161,7 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
         for n, v in enumerate(form.errors):
             msg = '<ul class="errorlist nonfield"><li>This question is already in this test.</li></ul>'
             if v:
-                if v['__all__']:
+                if v.get('__all__', None):
                     form.errors[n]['__all__'] = mark_safe(msg)
         return super().form_invalid(form)
 
@@ -141,7 +169,15 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
         return reverse('tests:test_detail', kwargs={'pk': self.object.pk})
 
 
-def pass_test(request, pk):
+def pass_test(request, pk=None):
+    test = Test.objects.get(pk=pk)
+    if not test.is_public and not test.access_by_link and request.user != test.owner and not request.user.is_staff:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'The test does not exist or it is not accessible.'
+        )
+        return redirect('tests:home')
     questions = Questions.objects.filter(test=pk)
 
     # for result

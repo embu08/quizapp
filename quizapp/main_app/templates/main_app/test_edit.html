@@ -20,7 +20,7 @@
         <div class="col-2"></div>
         <div class="bg-danger col-10 mb-1 rounded p-0">{{ field.errors }}</div>
         {% endif %}
-        {% if field.label == 'Is public' or field.label == 'Show results' %}
+        {% if field.label == 'Is public' or field.label == 'Show results' or field.label == 'Access by link' %}
         <div class="input-group-text d-flex justify-content-between col-2">{{ field.label }}
             <div class="p-0">{{ field }}</div>
         </div>

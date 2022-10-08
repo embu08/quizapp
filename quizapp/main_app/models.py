@@ -1,7 +1,7 @@
-from django.core.exceptions import ValidationError
+import uuid
+
 from django.db import models, IntegrityError
 from django.urls import reverse
-
 from quizapp import settings
 
 
@@ -21,6 +21,7 @@ class Test(models.Model):
     time_create = models.DateTimeField(auto_now_add=True, verbose_name='date')
     time_update = models.DateTimeField(auto_now=True)
     is_public = models.BooleanField(default=True)
+    access_by_link = models.BooleanField(default=True)
     show_results = models.BooleanField(default=True)
     category = models.ForeignKey('Categories', blank=True,
                                  null=True, on_delete=models.PROTECT)
@@ -68,3 +69,6 @@ class PassedTests(models.Model):
 
     def __str__(self):
         return f'{self.user} get {self.grade} for test {self.test}, {self.data_passed}'
+
+
+
