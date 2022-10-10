@@ -1,7 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django import forms
-from django.contrib.auth.models import User
-from django.contrib.auth.validators import UnicodeUsernameValidator
 from .models import *
 from django.forms.models import inlineformset_factory
 from . import InlineFormSet
@@ -21,11 +18,12 @@ class CreateTestForm(forms.ModelForm):
     name = forms.CharField(label='Test name',
                            widget=forms.TextInput(attrs={'class': 'form-control',
                                                          'placeholder': 'enter the test name here...'}),
-                           min_length=1, max_length=255)
+                           min_length=3, max_length=255)
     description = forms.CharField(label='Description',
                                   widget=forms.Textarea(attrs={'rows': '3', 'class': 'form-control',
                                                                'placeholder': 'enter the test description...', }),
-                                  max_length=1000)
+                                  max_length=1000,
+                                  required=False)
 
     class Meta:
         model = Test
