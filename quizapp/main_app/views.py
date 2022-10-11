@@ -194,7 +194,7 @@ def pass_test(request, pk=None):
                 result += q.value
         try:
             PassedTests.objects.create(test=Test.objects.get(pk=pk), user=CustomUser.objects.get(pk=request.user.pk),
-                                       grade=result, max_grade=max_result)
+                                       grade=int(result), max_grade=int(max_result))
         except Exception as e:
             print(f'adding PassedTest to BD error: {e}')
         context = {

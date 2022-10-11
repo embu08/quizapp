@@ -20,7 +20,7 @@ class QuestionsAdmin(admin.ModelAdmin):
     list_display = ('id', 'question', 'correct_answer', 'test')
     list_display_links = ('question',)
     search_fields = ('question',)
-    list_filter = ('test', )
+    list_filter = ('test',)
     readonly_fields = ('test',)
 
 
@@ -36,5 +36,3 @@ admin.site.register(Categories, CategoriesAdmin)
 admin.site.register(Test, TestAdmin)
 admin.site.register(Questions, QuestionsAdmin)
 admin.site.register(PassedTests, PassedTestsAdmin)
-
-# Register your models here.

@@ -1,16 +1,20 @@
-import uuid
-
-from django.db import models, IntegrityError
+from django.core.exceptions import ValidationError
+from django.db import models
 from django.urls import reverse
 from quizapp import settings
 
 
 class Categories(models.Model):
-    name = models.CharField(max_length=100, db_index=True, unique=True,
+    name = models.CharField(max_length=100,
+                            db_index=True, unique=True, blank=False,
                             error_messages='Test with that name already exists')
 
+    def clean(self):
+        if len(str(self.name)) < 3:
+            raise ValidationError('Length of the name of the category must be between 3 and 100 symbols.')
+
     def __str__(self):
-        return self.name
+        return str(self.name).title()
 
 
 class Test(models.Model):
@@ -27,13 +31,13 @@ class Test(models.Model):
                                  null=True, on_delete=models.PROTECT)
 
     def __str__(self):
-        return self.name
+        return f'Test "{self.name}" by {self.owner}'
 
     def get_edit_url(self):
-        return reverse('tests:edit', kwargs={'pk': self.pk})
+        return reverse('tests:test_edit', kwargs={'pk': self.pk})
 
     def get_pass_url(self):
-        return reverse('tests:pass', kwargs={'pk': self.pk})
+        return reverse('tests:pass_test', kwargs={'pk': self.pk})
 
     def get_absolute_url(self):
         return reverse('tests:test_detail', kwargs={'pk': self.pk})
@@ -42,7 +46,7 @@ class Test(models.Model):
 class Questions(models.Model):
     question = models.CharField(max_length=255, null=False, blank=False)
     correct_answer = models.CharField(max_length=255)
-    answer_1 = models.CharField(max_length=255, null=True)
+    answer_1 = models.CharField(max_length=255)
     answer_2 = models.CharField(max_length=255, null=True, blank=True)
     answer_3 = models.CharField(max_length=255, null=True, blank=True)
     value = models.IntegerField(default=1)
@@ -50,7 +54,7 @@ class Questions(models.Model):
                              related_name='question_test')
 
     def __str__(self):
-        return self.question
+        return f'Test: {str(self.test).title()}, question: {str(self.question).title()}'
 
     class Meta:
         constraints = [
@@ -63,12 +67,9 @@ class PassedTests(models.Model):
     test = models.ForeignKey('Test', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              null=True, blank=True, on_delete=models.CASCADE)
-    grade = models.DecimalField(max_digits=5, decimal_places=2)
-    max_grade = models.DecimalField(max_digits=5, decimal_places=2)
+    grade = models.IntegerField()
+    max_grade = models.IntegerField()
     data_passed = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.user} get {self.grade} for test {self.test}, {self.data_passed}'
-
-
-
+        return f'{self.user} scored {self.grade}/{self.max_grade} points for test "{self.test}", {self.data_passed}'

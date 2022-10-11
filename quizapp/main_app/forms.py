@@ -41,8 +41,9 @@ class CreateTestForm(forms.ModelForm):
 
 
 class UpdateTestForm(forms.ModelForm):
-    name = forms.CharField(max_length=255, widget=forms.TextInput({'class': 'form-control'}), min_length=1)
-    description = forms.CharField(max_length=1000, widget=forms.Textarea({'class': 'form-control', 'rows': '3'}))
+    name = forms.CharField(widget=forms.TextInput({'class': 'form-control'}), min_length=3, max_length=255)
+    description = forms.CharField(widget=forms.Textarea({'class': 'form-control', 'rows': '3'}),
+                                  required=False, max_length=1000)
 
     class Meta:
         model = Test
