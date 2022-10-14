@@ -4,7 +4,7 @@ from django.test import TestCase
 
 class CreateTestTestCase(TestCase):
 
-    def tests_CreateTestForm_form_is_valid(self):
+    def test_CreateTestForm_form_is_valid(self):
         category = Categories.objects.create(name='category')
         form = CreateTestForm(
             data={
@@ -21,7 +21,7 @@ class CreateTestTestCase(TestCase):
                 print('*' * 20, e)
         self.assertTrue(form.is_valid())
 
-    def tests_CreateTestForm_form_is_not_valid(self):
+    def test_CreateTestForm_form_is_not_valid(self):
         form = CreateTestForm(
             data={
                 'name': 'ca',
@@ -41,7 +41,7 @@ class CreateTestTestCase(TestCase):
 
 
 class UpdateTestTestCase(TestCase):
-    def tests_UpdateTestForm_form_is_valid(self):
+    def test_UpdateTestForm_form_is_valid(self):
         category = Categories.objects.create(name='category')
         form = UpdateTestForm(
             data={
@@ -58,7 +58,7 @@ class UpdateTestTestCase(TestCase):
                 print('*' * 20, e)
         self.assertTrue(form.is_valid())
 
-    def tests_UpdateTestForm_form_is_not_valid(self):
+    def test_UpdateTestForm_form_is_not_valid(self):
         form = UpdateTestForm(
             data={
                 'name': 'ca',

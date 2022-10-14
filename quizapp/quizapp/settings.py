@@ -141,3 +141,6 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # EMAIL_USE_TLS = True
 #
 PASSWORD_RESET_TIMEOUT = 14400
+
+LOGIN_REDIRECT_URL = '/users/login/'
+LOGIN_URL = '/users/login/'

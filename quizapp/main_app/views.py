@@ -42,7 +42,6 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
     template_name = 'main_app/show_my_tests_list.html'
     context_object_name = 'tests'
     paginate_by = 12
-    ordering = ['-time_create', ]
 
     def get_queryset(self):
         return Test.objects.filter(owner=self.request.user).order_by('-time_update')

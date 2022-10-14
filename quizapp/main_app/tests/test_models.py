@@ -1,13 +1,12 @@
 from django.test import TestCase
 from main_app.models import *
-from django.db.utils import IntegrityError, DataError
+from django.db.utils import IntegrityError
 
 from users.models import CustomUser
-from main_app.urls import urlpatterns
 
 
 class CategoriesTestCase(TestCase):
-    def tests_str_is_test_name_and_question(self):
+    def test_str_is_test_name_and_question(self):
         c = Categories.objects.create(name='cat dog')
         s = 'Cat Dog'
         self.assertEqual(s, str(c))
@@ -30,19 +29,19 @@ class TestTestCase(TestCase):
             category=self.c
         )
 
-    def tests_str_is_test_name_and_question(self):
+    def test_str_is_test_name_and_question(self):
         s = 'Test "test" by user1'
         self.assertEqual(s, str(self.t))
 
-    def tests_get_absolute_url_returns_correct_url(self):
+    def test_get_absolute_url_returns_correct_url(self):
         t1 = Test.objects.first()
         self.assertEqual('/tests/' + str(t1.pk) + '/', t1.get_absolute_url())
 
-    def tests_get_pass_url_returns_correct_url(self):
+    def test_get_pass_url_returns_correct_url(self):
         t1 = Test.objects.first()
         self.assertEqual('/tests/' + str(t1.pk) + '/edit/', t1.get_edit_url())
 
-    def tests_get_edit_url_returns_correct_url(self):
+    def test_get_edit_url_returns_correct_url(self):
         t1 = Test.objects.first()
         self.assertEqual('/tests/' + str(t1.pk) + '/pass/', t1.get_pass_url())
 
@@ -59,7 +58,7 @@ class QuestionsModelTestCase(TestCase):
             answer_3='idk3',
             test=self.t)
 
-    def tests_question_is_already_in_the_test(self):
+    def test_question_is_already_in_the_test(self):
         q2 = Questions(question='why',
                        correct_answer='123',
                        answer_1='321',
@@ -67,7 +66,7 @@ class QuestionsModelTestCase(TestCase):
         with self.assertRaises(IntegrityError):
             q2.save()
 
-    def tests_str_is_test_name_and_question(self):
+    def test_str_is_test_name_and_question(self):
         s = 'Test: Test "Test" By None, question: Why'
         self.assertEqual(s, str(self.q1))
 
@@ -85,6 +84,6 @@ class PassedTestTestCase(TestCase):
             max_grade=200500,
         )
 
-    def tests_passed_test_str_returns_long_string(self):
+    def test_passed_test_str_returns_long_string(self):
         s = f'user1 scored 100500/200500 points for test "{self.pt.test}", {self.pt.data_passed}'
         self.assertEqual(s, str(self.pt))
