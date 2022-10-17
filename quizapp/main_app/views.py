@@ -70,6 +70,16 @@ class AddTestView(LoginRequiredMixin, CreateView):
         )
         return super().form_valid(form)
 
+    def get(self, request, *args, **kwargs):
+        if not request.user.email_confirmed:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                'Please verify your email address. You cannot add tests and reset your password'
+            )
+            return redirect('tests:home')
+        return super().get(request, *args, **kwargs)
+
 
 class UpdateTestView(LoginRequiredMixin, UpdateView):
     model = Test
