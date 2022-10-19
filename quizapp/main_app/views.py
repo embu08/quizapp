@@ -180,7 +180,7 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
 
 def pass_test(request, pk=None):
     test = Test.objects.get(pk=pk)
-    if not test.is_public and not test.access_by_link and request.user != test.owner and not request.user.is_staff:
+    if not test.access_by_link and not test.is_public and request.user != test.owner and not request.user.is_staff:
         messages.add_message(
             request,
             messages.ERROR,
@@ -193,9 +193,8 @@ def pass_test(request, pk=None):
     if request.method == 'POST':
         correct, total_questions = 0, len(questions)
         result, max_result = 0, 0
-        cor_ans, ans = [], []
+        ans = []
         for q in questions:
-            cor_ans.append(q.correct_answer)
             ans.append(request.POST.get(q.question))
             max_result += q.value
             if q.correct_answer == request.POST.get(q.question):
@@ -205,18 +204,29 @@ def pass_test(request, pk=None):
             PassedTests.objects.create(test=Test.objects.get(pk=pk), user=CustomUser.objects.get(pk=request.user.pk),
                                        grade=int(result), max_grade=int(max_result))
         except Exception as e:
-            print(f'adding PassedTest to BD error: {e}')
-        context = {
-            'result': result,
-            'max_result': max_result,
-            'time': request.POST.get('timer'),
-            'correct': correct,
-            'total': total_questions,
-            'cor_ans': cor_ans,
-            'ans': ans,
-            'questions': questions,
-            'show_results': Test.objects.get(id=pk).show_results
-        }
+            pass
+            # print(f'adding PassedTest to BD error: {e}')
+        show_results = Test.objects.get(id=pk).show_results
+        if show_results:
+            context = {
+                'result': result,
+                'max_result': max_result,
+                'time': request.POST.get('timer'),
+                'correct': correct,
+                'total': total_questions,
+                'ans': ans,
+                'questions': questions,
+                'show_results': show_results
+            }
+        else:
+            context = {
+                'result': result,
+                'max_result': max_result,
+                'time': request.POST.get('timer'),
+                'correct': correct,
+                'total': total_questions,
+                'show_results': show_results
+            }
         return render(request, 'main_app/result.html', context)
 
     # for test

@@ -11,6 +11,12 @@ class CategoriesTestCase(TestCase):
         s = 'Cat Dog'
         self.assertEqual(s, str(c))
 
+    def test_len_name_lower_than_3_cause_validation_error(self):
+        c = Categories(name='ca')
+        with self.assertRaises(ValidationError):
+            c.clean()
+            c.save()
+
 
 class TestTestCase(TestCase):
 

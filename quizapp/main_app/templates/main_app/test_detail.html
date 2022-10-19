@@ -27,7 +27,7 @@
     <div class="card-body">{{ details.description }}</div>
 </div>
 
-{% for question in details.question_test.all %}
+{% for question in details.question_test.all reversed %}
 <div class="card my-2">
     <div class="card-header row m-0">
         <div class="col-2 border-end border-dark">Question:</div>

@@ -23,7 +23,6 @@ class HomeViewTestCase(SimpleTestCase):
 
 
 class ShowAllTestsListVIewTestCase(TestCase):
-    # create 13 tests, with questions and users
     @classmethod
     def setUpTestData(cls):
         number_of_tests, questions = 15, 5
@@ -444,54 +443,253 @@ class TestQuestionsEditViewTestCase(TestCase):
         )
         self.c = Categories.objects.create(name='cat')
         self.test = Test.objects.create(name='test1', owner=self.u1)
-        self.data = {
-            'name': 'cat',
-            'category': self.c,
-            'description': 'cats',
-        }
-        self.url_of_first_test = f'/tests/{self.test.pk}/edit/'
+        self.question = Questions.objects.create(
+            question='why',
+            correct_answer='because',
+            answer_1='idk1',
+            answer_2='idk2',
+            answer_3='idk3',
+            test=self.test)
+        self.url_of_first_question = f'/tests/{self.test.pk}/questions/edit/'
 
     def test_view_url_exists_at_desired_location(self):
         self.client.login(username='user1', password='testpassword1!')
-        resp = self.client.get(self.url_of_first_test)
+        resp = self.client.get(self.url_of_first_question)
         self.assertEqual(resp.status_code, 200)
 
     def test_view_url_accessible_by_name(self):
         self.client.login(username='user1', password='testpassword1!')
-        resp = self.client.get(reverse('tests:test_edit', kwargs={'pk': self.test.pk}))
+        resp = self.client.get(reverse('tests:test_questions_edit', kwargs={'pk': self.test.pk}))
         self.assertEqual(resp.status_code, 200)
 
     def test_view_uses_correct_template(self):
         self.client.login(username='user1', password='testpassword1!')
-        resp = self.client.get(self.url_of_first_test)
+        resp = self.client.get(self.url_of_first_question)
         self.assertEqual(resp.status_code, 200)
-        self.assertTemplateUsed(resp, 'main_app/test_edit.html')
+        self.assertTemplateUsed(resp, 'main_app/test_questions_edit.html')
 
     def test_anonymous_user_doesnt_have_access_to_test_edit_page(self):
-        resp = self.client.get(self.url_of_first_test)
+        resp = self.client.get(self.url_of_first_question)
         # 302 - cause LoginRequiredMixin redirects to login page
         self.assertEqual(resp.status_code, 302)
-        self.assertRedirects(resp, '/users/login/?next=' + self.url_of_first_test)
+        self.assertRedirects(resp, '/users/login/?next=' + self.url_of_first_question)
 
     def test_not_owner_of_the_test_doesnt_have_access_to_test_edit_page(self):
         self.client.login(username='user2', password='testpassword1!')
-        resp = self.client.get(self.url_of_first_test)
+        resp = self.client.get(self.url_of_first_question)
         # 302 - cause LoginRequiredMixin redirects to login page
         self.assertEqual(resp.status_code, 302)
         self.assertRedirects(resp, '/')
 
-    def test_blank_form_cause_error(self):
+    def test_valid_form_redirects_to_test_detail(self):
         self.client.login(username='user1', password='testpassword1!')
-        resp = self.client.post(self.url_of_first_test, {})
-        self.assertFormError(resp, 'form', 'name', 'This field is required.')
+        data = {
+            'question_test-TOTAL_FORMS': '1',
+            'question_test-INITIAL_FORMS': '1',
+            'question_test-MIN_NUM_FORMS': '0',
+            'question_test-MAX_NUM_FORMS': '50',
+            'question_test-0-question': ['2 + 6'],
+            'question_test-0-correct_answer': ['8'],
+            'question_test-0-answer_1': ['10'],
+            'question_test-0-answer_2': ['23'],
+            'question_test-0-answer_3': [''],
+            'question_test-0-value': 4,
+            'question_test-0-id': str(self.question.pk),
+            'question_test-0-test': str(self.test.pk)
+        }
+        resp = self.client.post(self.url_of_first_question, data)
+        self.assertEqual(resp.status_code, 302)
+        self.assertRedirects(resp, '/tests/' + str(self.test.pk) + '/')
 
-    def test_invalid_form_cause_error(self):
+    def test_creation_question_with_same_name_cause_error(self):
         self.client.login(username='user1', password='testpassword1!')
-        resp = self.client.post(self.url_of_first_test, {'name': '*' * 256})
-        self.assertFormError(resp, 'form', 'name', 'Ensure this value has at most 255 characters (it has 256).')
+        data = {
+            'question_test-TOTAL_FORMS': '2',
+            'question_test-INITIAL_FORMS': '2',
+            'question_test-MIN_NUM_FORMS': '0',
+            'question_test-MAX_NUM_FORMS': '50',
+            'question_test-0-question': ['why'],
+            'question_test-0-correct_answer': ['8'],
+            'question_test-0-answer_1': ['10'],
+            'question_test-0-answer_2': ['23'],
+            'question_test-0-answer_3': [''],
+            'question_test-0-value': 4,
+            'question_test-0-id': str(self.question.pk),
+            'question_test-0-test': str(self.test.pk),
+            'question_test-1-question': ['why'],
+            'question_test-1-correct_answer': ['8'],
+            'question_test-1-answer_1': ['10'],
+            'question_test-1-answer_2': ['23'],
+            'question_test-1-answer_3': [''],
+            'question_test-1-value': 4,
+            'question_test-1-id': str(self.question.pk),
+            'question_test-1-test': str(self.test.pk)
+        }
+        resp = self.client.post(self.url_of_first_question, data)
+        er_msg = '<ul class="errorlist nonfield"><li>This question is already in this test.</li></ul>'
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(er_msg, resp.context_data['form'].errors)
 
-    def test_valid_form_cause_redirect_to_tests_detail(self):
+
+class TestPassTestTestCase(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        u = CustomUser.objects.create_user(
+            username='user1',
+            email='u1@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        Test.objects.create(name='test1', owner=u)
+        Test.objects.create(name='test2', owner=u, is_public=False)
+        Test.objects.create(name='test3', owner=u, is_public=False, access_by_link=False)
+        Test.objects.create(name='test4', owner=u, show_results=False)
+        for t in Test.objects.all():
+            for q in range(2):
+                Questions.objects.create(
+                    question='why' + str(q),
+                    correct_answer='correct_answer',
+                    answer_1='wrong_answer1',
+                    answer_2='wrong_answer1',
+                    answer_3='wrong_answer1',
+                    value=1,
+                    test=t)
+
+    def setUp(self):
+        self.u1 = CustomUser.objects.get(username='user1')
+        self.u2 = CustomUser.objects.create_user(
+            username='user2',
+            email='u2@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.client = Client()
+        self.t1 = Test.objects.get(name='test1')
+        self.t2 = Test.objects.get(name='test2')
+        self.t3 = Test.objects.get(name='test3')
+        self.t4 = Test.objects.get(name='test4')
+        self.t1_url = '/tests/' + str(self.t1.pk) + '/pass/'
+        self.t2_url = '/tests/' + str(self.t2.pk) + '/pass/'
+        self.t3_url = '/tests/' + str(self.t3.pk) + '/pass/'
+        self.t4_url = '/tests/' + str(self.t4.pk) + '/pass/'
+
+    def test_view_url_exists_at_desired_location_and_anonymous_user_get_access_to_public_test(self):
+        resp = self.client.get(self.t1_url)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        resp = self.client.get(reverse('tests:pass_test', kwargs={'pk': self.t1.pk}))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        resp = self.client.get(self.t1_url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main_app/pass_test.html')
+
+    def test_non_owner_user_get_access_to_public_test(self):
+        self.client.login(username='user2', password='testpassword1!')
+        resp = self.client.get(self.t1_url)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_private_test_accessible_by_link(self):
+        resp = self.client.get(self.t2_url)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_private_and_not_accessible_by_link_not_accessible(self):
+        resp = self.client.get(self.t3_url)
+        self.assertEqual(resp.status_code, 302)
+        self.assertRedirects(resp, '/')
+
+    def test_pass_test_redirects_to_results(self):
+        data = {'why0': 'correct_answer', 'why1': 'wrong_answer1', 'timer': '123'}
+        resp = self.client.post(self.t1_url, data=data)
+        self.assertTemplateUsed(resp, 'main_app/result.html')
+
+    def test_correct_answers_increase_score_and_time_is_saved_correctly(self):
+        data = {'why0': 'correct_answer', 'why1': 'correct_answer', 'timer': '1'}
+        resp = self.client.post(self.t1_url, data=data)
+        for i in resp.context[0]:
+            if 'result' in i:
+                self.assertEqual(2, i['result'])
+            if 'time' in i:
+                self.assertEqual('1', i['time'])
+        data = {'why0': 'correct_answer', 'why1': 'wrong_answer', 'timer': '12'}
+        resp = self.client.post(self.t1_url, data=data)
+        for i in resp.context[0]:
+            if 'result' in i:
+                self.assertEqual(1, i['result'])
+            if 'time' in i:
+                self.assertEqual('12', i['time'])
+        data = {'why0': 'wrong_answer', 'why1': 'wrong_answer', 'timer': '123'}
+        resp = self.client.post(self.t1_url, data=data)
+        for i in resp.context[0]:
+            if 'result' in i:
+                self.assertEqual(0, i['result'])
+            if 'time' in i:
+                self.assertEqual('123', i['time'])
+
+    def test_context_is_reduced_if_not_show_results(self):
+        data = {'why0': 'correct_answer', 'why1': 'correct_answer', 'timer': '1'}
+        resp = self.client.post(self.t4_url, data=data)
+        self.assertEqual(None, resp.context.get('ans', None))
+        self.assertEqual(None, resp.context.get('questions', None))
+
+
+class PassedTestViewTestCase(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        number_of_tests, questions = 21, 5
+        Categories.objects.create(name='cat')
+        u = CustomUser.objects.create_user(
+            username='user1',
+            email='user1@test.com',
+            password='testpassword1!',
+            email_confirmed=True
+        )
+        Test.objects.create(
+            name='test',
+            owner=u,
+            description='cat',
+            category=Categories.objects.first(), )
+        for t in range(number_of_tests):
+            PassedTests.objects.create(test=Test.objects.get(name='test'),
+                                       user=u,
+                                       grade=5,
+                                       max_grade=10)
+
+    def setUp(self):
+        self.client = Client()
         self.client.login(username='user1', password='testpassword1!')
-        resp = self.client.post(self.url_of_first_test, {'name': 'test1', 'description': 'asasd'})
-        test_pk = Test.objects.get(name='test1').pk
-        self.assertRedirects(resp, reverse('tests:test_detail', kwargs={'pk': test_pk}))
+
+    def test_view_url_exists_at_desired_location(self):
+        resp = self.client.get('/tests/passed_tests/')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        resp = self.client.get(reverse('tests:passed_tests'))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        resp = self.client.get(reverse('tests:passed_tests'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main_app/passed_tests.html')
+
+    def test_pagination_is_twenty(self):
+        resp = self.client.get(reverse('tests:passed_tests'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('is_paginated' in resp.context)
+        self.assertTrue(resp.context['is_paginated'])
+        self.assertEqual(20, len(resp.context['passed_tests']))
+
+    def test_one_test_in_second_page_of_pagination(self):
+        resp = self.client.get(reverse('tests:passed_tests') + '?page=2')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(1, len(resp.context['passed_tests']))
+
+    def test_ordering_last_passed_is_first(self):
+        resp = self.client.get(reverse('tests:passed_tests'))
+        last_test = PassedTests.objects.last()
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(last_test, resp.context['passed_tests'][0])
