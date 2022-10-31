@@ -22,29 +22,34 @@ from main_app.models import Test, PassedTests
 from .tokens import account_activation_token
 
 
-def activate(request, uidb64, token):
-    User = get_user_model()
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except:
-        user = None
+class RegisterUser(CreateView):
+    form_class = RegisterUserForm
+    template_name = 'users/register.html'
+    success_url = reverse_lazy('users:login')
 
-    if user is not None and account_activation_token.check_token(user, token):
-        user.email_confirmed = True
-        user.save()
-        messages.add_message(request, messages.SUCCESS,
-                             f'Your email was successfully confirmed!')
-    else:
-        messages.add_message(request, messages.ERROR,
-                             f'Activation link is invalid!')
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        activate_email(self.request, self.request.user, form.cleaned_data.get('email'))
+        return redirect('tests:home')
 
-    return redirect('tests:home')
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            msg = mark_safe(
+                f'You are already sign up. If you want to register a new account, please <a class="text-dark" href="/users/logout/">log out</a> first.')
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                msg
+            )
+            return redirect('tests:home')
+        return super().get(request, *args, **kwargs)
 
 
 def activate_email(request, user, to_email):
     return_in_the_end = False
     if type(user) == str:
+        # it can be called from template, that passes user as string, not as CustomUser object
         user = CustomUser.objects.get(pk=request.user.pk)
         return_in_the_end = True
     mail_subject = 'Activate your user account.'
@@ -67,19 +72,17 @@ def activate_email(request, user, to_email):
         return redirect('tests:home')
 
 
-class RegisterUser(CreateView):
-    form_class = RegisterUserForm
-    template_name = 'users/register.html'
-    success_url = reverse_lazy('users:login')
-
-    def form_valid(self, form):
-        user = form.save()
-        login(self.request, user)
-        activate_email(self.request, self.request.user, form.cleaned_data.get('email'))
+def login_user(request):
+    if request.user.is_authenticated:
+        msg = mark_safe(
+            f'You are already logged in. If you want to log in to another account, please <a class="text-dark" href="/users/logout/">log out</a> first.')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            msg
+        )
         return redirect('tests:home')
 
-
-def login_user(request):
     form = LoginUserForm
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -90,7 +93,7 @@ def login_user(request):
             user = auth.authenticate(username=username, password=password)
         if user is not None:
             auth.login(request, user)
-            if not request.POST.get('remember_me'):
+            if request.POST.get('remember_me') == 'False' or not request.POST.get('remember_me'):
                 request.session.set_expiry(0)
                 request.session.modified = True
             messages.add_message(request, messages.SUCCESS,
@@ -101,18 +104,12 @@ def login_user(request):
                                  f'Please enter a correct username and password. '
                                  f'Note that both fields may be case-sensitive.')
     context = {'form': form}
-    return render(request, 'users/new_login.html', context=context)
+    return render(request, 'users/login.html', context=context)
 
 
-class UpdateUserView(LoginRequiredMixin, UpdateView):
-    template_name = 'users/update_user.html'
-    form_class = UpdateUserForm
-
-    def get_success_url(self):
-        return reverse_lazy('users:my_profile')
-
-    def get_object(self, queryset=None):
-        return self.request.user
+def logout_user(request):
+    logout(request)
+    return redirect('users:login')
 
 
 class MyProfileView(LoginRequiredMixin, TemplateView):
@@ -126,9 +123,15 @@ class MyProfileView(LoginRequiredMixin, TemplateView):
         return context
 
 
-def logout_user(request):
-    logout(request)
-    return redirect('users:login')
+class UpdateUserView(LoginRequiredMixin, UpdateView):
+    template_name = 'users/update_user.html'
+    form_class = UpdateUserForm
+
+    def get_success_url(self):
+        return reverse_lazy('users:my_profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user
 
 
 class ChangePasswordView(PasswordChangeView):
@@ -148,6 +151,26 @@ class ChangePasswordView(PasswordChangeView):
         # except the current one.
         update_session_auth_hash(self.request, form.user)
         return super().form_valid(form)
+
+
+def activate(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except:
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.email_confirmed = True
+        user.save()
+        messages.add_message(request, messages.SUCCESS,
+                             f'Your email was successfully confirmed!')
+    else:
+        messages.add_message(request, messages.ERROR,
+                             f'Activation link is invalid!')
+
+    return redirect('tests:home')
 
 
 class PasswordResetViewCustom(PasswordResetView):

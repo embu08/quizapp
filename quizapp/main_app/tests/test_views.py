@@ -27,7 +27,7 @@ class ShowAllTestsListVIewTestCase(TestCase):
     def setUpTestData(cls):
         number_of_tests, questions = 15, 5
         Categories.objects.create(name='cat')
-        u = CustomUser.objects.create(
+        u = CustomUser.objects.create_user(
             username='user0',
             email='user0@test.com',
             email_confirmed=True
@@ -365,9 +365,11 @@ class UpdateTestViewTestCase(TestCase):
 
     def test_valid_form_cause_redirect_to_tests_detail(self):
         self.client.login(username='user1', password='testpassword1!')
-        resp = self.client.post(self.url_of_first_test, {'name': 'test1', 'description': 'asasd'})
         test_pk = Test.objects.get(name='test1').pk
+        resp = self.client.post(self.url_of_first_test, {'name': 'test123', 'description': 'asasd'})
         self.assertRedirects(resp, reverse('tests:test_detail', kwargs={'pk': test_pk}))
+        self.assertEqual('test123', Test.objects.get(pk=test_pk).name)
+        self.assertEqual('asasd', Test.objects.get(pk=test_pk).description)
 
 
 class TestDetailViewTestCase(TestCase):

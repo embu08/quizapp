@@ -15,7 +15,6 @@ class CategoriesTestCase(TestCase):
         c = Categories(name='ca')
         with self.assertRaises(ValidationError):
             c.clean()
-            c.save()
 
 
 class TestTestCase(TestCase):
