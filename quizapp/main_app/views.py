@@ -17,10 +17,13 @@ class HomeView(TemplateView):
 
 
 class ShowAllTestsListVIew(ListView):
+    tests_with_questions = [b[0] for b in [q for q in Questions.objects.values_list('test').distinct()]]
     model = Test
     template_name = 'main_app/show_tests_list.html'
     context_object_name = 'tests'
     paginate_by = 12
+    # queryset = Test.objects.filter(pk__in=tests_with_questions, is_public=True)
+    queryset = Test.objects.all()
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -28,13 +31,32 @@ class ShowAllTestsListVIew(ListView):
         for t in context['object_list']:
             questions[t.pk] = Questions.objects.filter(test=t.pk).count()
         context['questions'] = questions
+        # context['ordering'] = self.request.GET.get('ordering')
+        print(context)
         return context
 
-    def get_queryset(self):
-        tests_with_questions = []
-        for q in Questions.objects.values_list('test').distinct():
-            tests_with_questions.append(*q)
-        return Test.objects.filter(pk__in=tests_with_questions, is_public=True).order_by('-time_update')
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering')
+        print('*' * 100)
+        print(ordering)
+        # validate ordering here
+        # if ordering == 'Updated':
+        #     return 'time_update'
+        # if ordering == 'Updated reversed':
+        #     return '-time_update'
+        # if ordering == 'Category':
+        #     return 'category'
+        # if ordering == 'Category reversed':
+        #     return '-category'
+        # if ordering == 'Title':
+        #     return 'name'
+        # if ordering == 'Title reversed':
+        #     return '-name'
+        # if ordering == 'Author':
+        #     return 'owner'
+        # if ordering == 'Author reversed':
+        #     return '-owner'
+        return ordering
 
 
 class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
