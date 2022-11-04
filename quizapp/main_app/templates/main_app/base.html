@@ -169,8 +169,8 @@
     <ul class="pagination m-0">
         <!--        first and previous-->
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page=1">First</a></li>
+        <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
         {% else %}
         <li class="page-item"><a class="page-link disabled text-dark" href="">First</a></li>
         <li class="page-item"><a class="page-link disabled text-dark" href="">Previous</a></li>
@@ -184,8 +184,8 @@
 
         <!--        next and last-->
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
+        <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page={{ page_obj.next_page_number }}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page={{ page_obj.paginator.num_pages }}">Last</a></li>
         {% else %}
         <li class="page-item"><a class="page-link disabled text-dark" href="">Next</a></li>
         <li class="page-item"><a class="page-link disabled text-dark" href="">Last</a></li>

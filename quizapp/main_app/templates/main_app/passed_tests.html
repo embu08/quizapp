@@ -5,6 +5,27 @@
 
 {% if passed_tests %}
 <h1 class="display-1 py-3 ">My passed tests</h1>
+
+<form action="{% url 'tests:passed_tests' %}" method="get" class="row mb-3">
+    <span class="col-1 d-flex align-items-center">Order by: </span>
+    <div class="col-2">
+        <select class="form-select" name="ordering">
+            <option value="None" selected disabled hidden>{{ title_ordering }}</option>
+            <option value="data_passed">Passed first</option>
+            <option value="-data_passed">Passed last</option>
+            <option value="category">Category</option>
+            <option value="-category">Category reversed</option>
+            <option value="name">Title</option>
+            <option value="-name">Title reversed</option>
+            <option value="owner">Author</option>
+            <option value="-owner">Author reversed</option>
+            <option value="grade">Grade min to max</option>
+            <option value="-grade">Grade max to min</option>
+        </select>
+    </div>
+    <input type="submit" class="col-1 btn btn-outline-info" value="Order">
+</form>
+
 <div class="row m-0">
     {% for t in passed_tests %}
     <div class="p-2 col-3">

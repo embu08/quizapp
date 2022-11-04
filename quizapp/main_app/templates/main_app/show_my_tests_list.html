@@ -5,6 +5,23 @@
 
 {% if tests %}
 <h1 class="display-1 py-3 ">My tests</h1>
+
+<form action="{% url 'tests:my_tests' %}" method="get" class="row mb-3">
+    <span class="col-1 d-flex align-items-center">Order by: </span>
+    <div class="col-2">
+        <select class="form-select" name="ordering">
+            <option value="None" selected disabled hidden>{{ title_ordering }}</option>
+            <option value="time_update">Updated first</option>
+            <option value="-time_update">Updated last</option>
+            <option value="category">Category</option>
+            <option value="-category">Category reversed</option>
+            <option value="name">Title</option>
+            <option value="-name">Title reversed</option>
+        </select>
+    </div>
+    <input type="submit" class="col-1 btn btn-outline-info" value="Order">
+</form>
+
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
 
     {% for test in tests %}

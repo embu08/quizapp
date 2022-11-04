@@ -22,8 +22,18 @@ class ShowAllTestsListVIew(ListView):
     template_name = 'main_app/show_tests_list.html'
     context_object_name = 'tests'
     paginate_by = 12
-    # queryset = Test.objects.filter(pk__in=tests_with_questions, is_public=True)
-    queryset = Test.objects.all()
+    queryset = Test.objects.filter(pk__in=tests_with_questions, is_public=True).order_by('-time_update')
+    ordering_title = {
+        'time_update': 'Updated first',
+        '-time_update': 'Updated last',
+        'category': 'Category',
+        '-category': 'Category reversed',
+        'name': 'Title',
+        '-name': 'Title reversed',
+        'owner': 'Author',
+        '-owner': 'Author reversed',
+        None: 'Updated last'
+    }
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -31,31 +41,12 @@ class ShowAllTestsListVIew(ListView):
         for t in context['object_list']:
             questions[t.pk] = Questions.objects.filter(test=t.pk).count()
         context['questions'] = questions
-        # context['ordering'] = self.request.GET.get('ordering')
-        print(context)
+        context['ordering'] = self.get_ordering()
+        context['title_ordering'] = self.ordering_title[context['ordering']]
         return context
 
     def get_ordering(self):
         ordering = self.request.GET.get('ordering')
-        print('*' * 100)
-        print(ordering)
-        # validate ordering here
-        # if ordering == 'Updated':
-        #     return 'time_update'
-        # if ordering == 'Updated reversed':
-        #     return '-time_update'
-        # if ordering == 'Category':
-        #     return 'category'
-        # if ordering == 'Category reversed':
-        #     return '-category'
-        # if ordering == 'Title':
-        #     return 'name'
-        # if ordering == 'Title reversed':
-        #     return '-name'
-        # if ordering == 'Author':
-        #     return 'owner'
-        # if ordering == 'Author reversed':
-        #     return '-owner'
         return ordering
 
 
@@ -64,9 +55,24 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
     template_name = 'main_app/show_my_tests_list.html'
     context_object_name = 'tests'
     paginate_by = 12
+    ordering_title = {
+        'time_update': 'Updated first',
+        '-time_update': 'Updated last',
+        'category': 'Category',
+        '-category': 'Category reversed',
+        'name': 'Title',
+        '-name': 'Title reversed',
+        None: 'Updated last'
+    }
 
     def get_queryset(self):
-        return Test.objects.filter(owner=self.request.user).order_by('-time_update')
+        q = Test.objects.filter(owner=self.request.user)
+        ordering = self.get_ordering()
+        if ordering:
+            q = q.order_by(ordering)
+        else:
+            q = q.order_by('-time_update')
+        return q
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -74,7 +80,13 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
         for t in context['object_list']:
             questions[t.pk] = Questions.objects.filter(test=t.pk).count()
         context['questions'] = questions
+        context['ordering'] = self.get_ordering()
+        context['title_ordering'] = self.ordering_title[context['ordering']]
         return context
+
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering')
+        return ordering
 
 
 class AddTestView(LoginRequiredMixin, CreateView):
@@ -273,6 +285,35 @@ class PassedTestView(LoginRequiredMixin, ListView):
     template_name = 'main_app/passed_tests.html'
     context_object_name = 'passed_tests'
     paginate_by = 20
+    ordering_title = {
+        'data_passed': 'Passed first',
+        '-data_passed': 'Passed last',
+        'category': 'Category',
+        '-category': 'Category reversed',
+        'name': 'Title',
+        '-name': 'Title reversed',
+        'owner': 'Author',
+        '-owner': 'Author reversed',
+        'grade': 'Grade min to max',
+        '-grade': 'Grade max to min',
+        None: 'Passed last'
+    }
 
     def get_queryset(self):
-        return PassedTests.objects.filter(user=self.request.user).order_by('-data_passed')
+        q = PassedTests.objects.filter(user=self.request.user)
+        ordering = self.get_ordering()
+        if ordering:
+            q = q.order_by(ordering)
+        else:
+            q = q.order_by('-data_passed')
+        return q
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ordering'] = self.get_ordering()
+        context['title_ordering'] = self.ordering_title[context['ordering']]
+        return context
+
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering')
+        return ordering
