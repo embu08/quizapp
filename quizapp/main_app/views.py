@@ -236,13 +236,15 @@ def pass_test(request, pk=None):
                 result += q.value
         try:
             PassedTests.objects.create(test=Test.objects.get(pk=pk), user=CustomUser.objects.get(pk=request.user.pk),
-                                       grade=int(result), max_grade=int(max_result))
+                                       grade=round(result / max_result * 100, 2), score=int(result),
+                                       max_grade=int(max_result))
         except Exception as e:
             pass
-            # print(f'adding PassedTest to BD error: {e}')
+            print(f'adding PassedTest to BD error: {e}')
         show_results = Test.objects.get(id=pk).show_results
         if show_results:
             context = {
+                'grade': round(result / max_result * 100, 2),
                 'result': result,
                 'max_result': max_result,
                 'time': request.POST.get('timer'),
@@ -254,6 +256,7 @@ def pass_test(request, pk=None):
             }
         else:
             context = {
+                'grade': round(result / max_result * 100, 2),
                 'result': result,
                 'max_result': max_result,
                 'time': request.POST.get('timer'),

@@ -67,7 +67,8 @@ class PassedTests(models.Model):
     test = models.ForeignKey('Test', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              null=True, blank=True, on_delete=models.CASCADE)
-    grade = models.IntegerField()
+    grade = models.DecimalField(decimal_places=2, max_digits=5)
+    score = models.IntegerField()
     max_grade = models.IntegerField()
     data_passed = models.DateTimeField(auto_now=True)
 

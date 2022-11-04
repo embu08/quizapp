@@ -28,7 +28,7 @@
 
 <div class="row m-0">
     {% for t in passed_tests %}
-    <div class="p-2 col-3">
+    <div class="p-2 ps-0 col-3">
         <div class="card">
             <div class="card-header row m-0">
                 <div class="col-4 border-end border-dark">Test name</div>
@@ -37,7 +37,7 @@
             <ul class="card-body">
                 <li class="row m-0">
                     <div class="col-4 border-end border-dark">Grade:</div>
-                    <div class="col-8">{{ t.grade }} / {{ t.max_grade }}</div>
+                    <div class="col-8">{{ t.grade }}</div>
                 </li>
                 <li class="row m-0">
                     <div class="col-4 border-end border-dark">Date</div>
