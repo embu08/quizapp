@@ -4,6 +4,7 @@
 {% block content %}
 
 <h1 class="display-1 py-3">{{ questions.first.test | title }}</h1>
+<span>{{ description }}</span>
 <div class="text-end text-secondary" id="displaytimer"><i>0 seconds</i></div>
 
 <form method='post' action=''>

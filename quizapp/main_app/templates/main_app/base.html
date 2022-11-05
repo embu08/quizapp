@@ -59,6 +59,7 @@
 
 
 
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
             integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
@@ -99,10 +100,15 @@
                 <li><a href="{% url 'tests:add' %}" class="nav-link px-2 text-black">Add</a></li>
                 {% endif %}
             </ul>
-
-            <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
-                <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
+            <!-- search -->
+            <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search" action="{% url 'tests:tests' %}">
+                {% if search %}
+                <input type="search" class="form-control" placeholder="{{ search }}" aria-label="Search" name="search">
+                {% else %}
+                <input type="search" class="form-control" placeholder="Search..." aria-label="Search" name="search">
+                {% endif %}
             </form>
+            <!-- end block search -->
 
             {% if user.is_authenticated %}
             <div class="dropdown me-2">
@@ -170,7 +176,9 @@
         <!--        first and previous-->
         {% if page_obj.has_previous %}
         <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page=1">First</a></li>
-        <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+        <li class="page-item"><a class="page-link"
+                                 href="?ordering={{ ordering }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
         {% else %}
         <li class="page-item"><a class="page-link disabled text-dark" href="">First</a></li>
         <li class="page-item"><a class="page-link disabled text-dark" href="">Previous</a></li>
@@ -184,8 +192,10 @@
 
         <!--        next and last-->
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page={{ page_obj.next_page_number }}">Next</a></li>
-        <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page={{ page_obj.paginator.num_pages }}">Last</a></li>
+        <li class="page-item"><a class="page-link" href="?ordering={{ ordering }}&page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        <li class="page-item"><a class="page-link"
+                                 href="?ordering={{ ordering }}&page={{ page_obj.paginator.num_pages }}">Last</a></li>
         {% else %}
         <li class="page-item"><a class="page-link disabled text-dark" href="">Next</a></li>
         <li class="page-item"><a class="page-link disabled text-dark" href="">Last</a></li>
@@ -214,6 +224,7 @@
 </footer>
 <!-- end block footer -->
 
+<!-- button "back to top" -->
 <script>
 //Get the button
 let mybutton = document.getElementById("btn-back-to-top");
@@ -280,6 +291,8 @@ function backToTop() {
 
 
 
+
 </script>
+<!-- end block button "back to top" -->
 </body>
 </html>

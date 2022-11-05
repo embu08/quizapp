@@ -10,6 +10,7 @@ from random import shuffle
 from .forms import *
 from .models import *
 from users.models import CustomUser
+from django.db.models import Q
 
 
 class HomeView(TemplateView):
@@ -22,7 +23,6 @@ class ShowAllTestsListVIew(ListView):
     template_name = 'main_app/show_tests_list.html'
     context_object_name = 'tests'
     paginate_by = 12
-    queryset = Test.objects.filter(pk__in=tests_with_questions, is_public=True).order_by('-time_update')
     ordering_title = {
         'time_update': 'Updated first',
         '-time_update': 'Updated last',
@@ -43,7 +43,24 @@ class ShowAllTestsListVIew(ListView):
         context['questions'] = questions
         context['ordering'] = self.get_ordering()
         context['title_ordering'] = self.ordering_title[context['ordering']]
+        context['search'] = self.request.GET.get('search', '')
         return context
+
+    def get_queryset(self):
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            q = Test.objects.filter(
+                Q(name__icontains=search_query) | Q(description__icontains=search_query) |
+                Q(category__name__icontains=search_query) | Q(owner__username__icontains=search_query),
+                pk__in=self.tests_with_questions, is_public=True)
+        else:
+            q = Test.objects.filter(pk__in=self.tests_with_questions, is_public=True)
+        ordering = self.get_ordering()
+        if ordering:
+            q = q.order_by(ordering)
+        else:
+            q = q.order_by('-time_update')
+        return q
 
     def get_ordering(self):
         ordering = self.request.GET.get('ordering')
@@ -279,7 +296,7 @@ def pass_test(request, pk=None):
         answers[q.question] = a
 
     context = {'questions': questions, 'answers': answers, 'len_a': len_a,
-               'show_results': Test.objects.get(id=pk).show_results}
+               'show_results': Test.objects.get(id=pk).show_results, 'description': Test.objects.get(id=pk).description}
     return render(request, 'main_app/pass_test.html', context)
 
 
@@ -291,12 +308,8 @@ class PassedTestView(LoginRequiredMixin, ListView):
     ordering_title = {
         'data_passed': 'Passed first',
         '-data_passed': 'Passed last',
-        'category': 'Category',
-        '-category': 'Category reversed',
-        'name': 'Title',
-        '-name': 'Title reversed',
-        'owner': 'Author',
-        '-owner': 'Author reversed',
+        'test': 'Test',
+        '-test': 'Test reversed',
         'grade': 'Grade min to max',
         '-grade': 'Grade max to min',
         None: 'Passed last'
