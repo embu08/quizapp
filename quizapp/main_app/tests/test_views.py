@@ -30,7 +30,8 @@ class ShowAllTestsListVIewTestCase(TestCase):
         u = CustomUser.objects.create_user(
             username='user0',
             email='user0@test.com',
-            email_confirmed=True
+            email_confirmed=True,
+            password='password!@#'
         )
 
         for test in range(number_of_tests):
@@ -48,7 +49,8 @@ class ShowAllTestsListVIewTestCase(TestCase):
                     name='test' + str(test),
                     owner=random.choice(CustomUser.objects.all()),
                     description='cat',
-                    category=Categories.objects.first()
+                    category=Categories.objects.first(),
+                    is_public=True
                 )
 
         for t in Test.objects.all():
@@ -604,11 +606,13 @@ class TestPassTestTestCase(TestCase):
         self.assertRedirects(resp, '/')
 
     def test_pass_test_redirects_to_results(self):
+        self.client.login(username='user1', password='testpassword1!')
         data = {'why0': 'correct_answer', 'why1': 'wrong_answer1', 'timer': '123'}
         resp = self.client.post(self.t1_url, data=data)
         self.assertTemplateUsed(resp, 'main_app/result.html')
 
     def test_correct_answers_increase_score_and_time_is_saved_correctly(self):
+        self.client.login(username='user1', password='testpassword1!')
         data = {'why0': 'correct_answer', 'why1': 'correct_answer', 'timer': '1'}
         resp = self.client.post(self.t1_url, data=data)
         for i in resp.context[0]:
@@ -632,6 +636,7 @@ class TestPassTestTestCase(TestCase):
                 self.assertEqual('123', i['time'])
 
     def test_context_is_reduced_if_not_show_results(self):
+        self.client.login(username='user1', password='testpassword1!')
         data = {'why0': 'correct_answer', 'why1': 'correct_answer', 'timer': '1'}
         resp = self.client.post(self.t4_url, data=data)
         self.assertEqual(None, resp.context.get('ans', None))
@@ -658,7 +663,8 @@ class PassedTestViewTestCase(TestCase):
         for t in range(number_of_tests):
             PassedTests.objects.create(test=Test.objects.get(name='test'),
                                        user=u,
-                                       grade=5,
+                                       grade=50.23,
+                                       score=5,
                                        max_grade=10)
 
     def setUp(self):

@@ -18,7 +18,6 @@ class HomeView(TemplateView):
 
 
 class ShowAllTestsListVIew(ListView):
-    tests_with_questions = [b[0] for b in [q for q in Questions.objects.values_list('test').distinct()]]
     model = Test
     template_name = 'main_app/show_tests_list.html'
     context_object_name = 'tests'
@@ -48,13 +47,15 @@ class ShowAllTestsListVIew(ListView):
 
     def get_queryset(self):
         search_query = self.request.GET.get('search', '')
+        # take all tests, that have questions, then take zero index, because previous return in tuple
+        tests_with_questions = [b[0] for b in [q for q in Questions.objects.values_list('test').distinct()]]
         if search_query:
             q = Test.objects.filter(
                 Q(name__icontains=search_query) | Q(description__icontains=search_query) |
                 Q(category__name__icontains=search_query) | Q(owner__username__icontains=search_query),
-                pk__in=self.tests_with_questions, is_public=True)
+                pk__in=tests_with_questions, is_public=True)
         else:
-            q = Test.objects.filter(pk__in=self.tests_with_questions, is_public=True)
+            q = Test.objects.filter(pk__in=tests_with_questions, is_public=True)
         ordering = self.get_ordering()
         if ordering:
             q = q.order_by(ordering)

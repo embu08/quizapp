@@ -243,7 +243,8 @@ class MyProfileViewTestCase(TestCase):
         for t in range(10):
             PassedTests.objects.create(test=Test.objects.get(name='test0'),
                                        user=CustomUser.objects.first(),
-                                       grade=5,
+                                       grade=51.42,
+                                       score=4,
                                        max_grade=10)
 
     def setUp(self):

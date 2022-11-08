@@ -85,10 +85,11 @@ class PassedTestTestCase(TestCase):
         self.pt = PassedTests.objects.create(
             test=self.t,
             user=self.u,
-            grade=100500,
+            grade=99.33,
+            score=50,
             max_grade=200500,
         )
 
     def test_passed_test_str_returns_long_string(self):
-        s = f'user1 scored 100500/200500 points for test "{self.pt.test}", {self.pt.data_passed}'
+        s = f"user1's grade is 99.33. Scored 50 out of 200500 points."
         self.assertEqual(s, str(self.pt))

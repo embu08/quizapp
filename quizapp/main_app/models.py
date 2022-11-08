@@ -73,4 +73,4 @@ class PassedTests(models.Model):
     data_passed = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.user} scored {self.grade}/{self.max_grade} points for test "{self.test}", {self.data_passed}'
+        return f"{self.user}'s grade is {self.grade}. Scored {self.score} out of {self.max_grade} points."
