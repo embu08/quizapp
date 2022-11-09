@@ -87,7 +87,7 @@ class PassedTestTestCase(TestCase):
             user=self.u,
             grade=99.33,
             score=50,
-            max_grade=200500,
+            max_score=200500,
         )
 
     def test_passed_test_str_returns_long_string(self):

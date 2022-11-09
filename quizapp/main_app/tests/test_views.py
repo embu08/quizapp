@@ -26,7 +26,7 @@ class ShowAllTestsListVIewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         number_of_tests, questions = 15, 5
-        Categories.objects.create(name='cat')
+        Categories.objects.create(name='category')
         u = CustomUser.objects.create_user(
             username='user0',
             email='user0@test.com',
@@ -47,7 +47,7 @@ class ShowAllTestsListVIewTestCase(TestCase):
             else:
                 Test.objects.create(
                     name='test' + str(test),
-                    owner=random.choice(CustomUser.objects.all()),
+                    owner=u,
                     description='cat',
                     category=Categories.objects.first(),
                     is_public=True
@@ -109,11 +109,79 @@ class ShowAllTestsListVIewTestCase(TestCase):
         self.assertFalse(t4 in resp.context['tests'])
         self.assertFalse(t4 in resp_2.context['tests'])
 
-    def test_ordering_last_updated_is_first(self):
+    def test_default_ordering_last_updated_is_first(self):
         resp = self.client.get(reverse('tests:tests'))
         last_test = Test.objects.last()
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(last_test, resp.context['tests'][0])
+
+    def test_ordering_by_time_update_returns_correct_order(self):
+        resp = self.client.get(reverse('tests:tests'), {'ordering': 'time_update'})
+        # test1 because test0 is private
+        first_test = Test.objects.get(name='test1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['tests'][0])
+
+    def test_ordering_by_name_returns_correct_order(self):
+        resp = self.client.get(reverse('tests:tests'), {'ordering': 'name'})
+        # test1 because test0 is private
+        first_test = Test.objects.get(name='test1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['tests'][0])
+
+    def test_ordering_by_name_reversed_returns_correct_order(self):
+        resp = self.client.get(reverse('tests:tests'), {'ordering': '-name'})
+        # test1 because test0 is private
+        first_test = Test.objects.get(name='test9')
+        self.assertTrue('9' > '14')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['tests'][0])
+
+    def test_search_returns_correct_tests(self):
+        # test1, 10, 11, 12, 13, 14
+        resp = self.client.get(reverse('tests:tests'), {'search': 'test1'})
+        tests = resp.context['tests']
+        test1 = Test.objects.get(name='test1')
+        test10 = Test.objects.get(name='test10')
+        test11 = Test.objects.get(name='test11')
+        test12 = Test.objects.get(name='test12')
+        test13 = Test.objects.get(name='test13')
+        test14 = Test.objects.get(name='test14')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(6, len(tests))
+        self.assertTrue(test1 in tests)
+        self.assertTrue(test10 in tests)
+        self.assertTrue(test11 in tests)
+        self.assertTrue(test12 in tests)
+        self.assertTrue(test13 in tests)
+        self.assertTrue(test14 in tests)
+
+    def test_search_works_by_description_as_well(self):
+        resp = self.client.get(reverse('tests:tests'), {'search': 'cat'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(12, len(resp.context['tests']))
+        resp2 = self.client.get(reverse('tests:tests'), {'page': '2', 'search': 'cat'})
+        self.assertEqual(resp2.status_code, 200)
+        # 15 - 1 (private) - 1 (without questions) - 12 (in 1 page) = 1
+        self.assertEqual(1, len(resp2.context['tests']))
+
+    def test_search_works_by_category_as_well(self):
+        resp = self.client.get(reverse('tests:tests'), {'search': 'category'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(12, len(resp.context['tests']))
+        resp2 = self.client.get(reverse('tests:tests'), {'page': '2', 'search': 'category'})
+        self.assertEqual(resp2.status_code, 200)
+        # 15 - 1 (private) - 1 (without questions) - 12 (in 1 page) = 1
+        self.assertEqual(1, len(resp2.context['tests']))
+
+    def test_search_works_by_owner_as_well(self):
+        resp = self.client.get(reverse('tests:tests'), {'search': 'user0'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(12, len(resp.context['tests']))
+        resp2 = self.client.get(reverse('tests:tests'), {'page': '2', 'search': 'user0'})
+        self.assertEqual(resp2.status_code, 200)
+        # 15 - 1 (private) - 1 (without questions) - 12 (in 1 page) = 1
+        self.assertEqual(1, len(resp2.context['tests']))
 
 
 class ShowMyTestsListVIewTestCase(TestCase):
@@ -224,6 +292,35 @@ class ShowMyTestsListVIewTestCase(TestCase):
         resp = self.client.get(reverse('tests:my_tests'))
         # 302 - cause LoginRequiredMixin redirects to login page
         self.assertEqual(resp.status_code, 302)
+
+    def test_ordering_by_time_update_returns_correct_order(self):
+        self.client.login(username='user1', password='testpassword1!')
+        resp = self.client.get(reverse('tests:my_tests'), {'ordering': 'time_update'})
+        first_test = Test.objects.get(name='test0')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['tests'][0])
+
+    def test_ordering_by_time_update_reversed_returns_correct_order(self):
+        self.client.login(username='user1', password='testpassword1!')
+        resp = self.client.get(reverse('tests:my_tests'), {'ordering': '-time_update'})
+        first_test = Test.objects.get(name='test28')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['tests'][0])
+
+    def test_ordering_by_name_returns_correct_order(self):
+        self.client.login(username='user1', password='testpassword1!')
+        resp = self.client.get(reverse('tests:my_tests'), {'ordering': 'name'})
+        first_test = Test.objects.get(name='test0')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['tests'][0])
+
+    def test_ordering_by_name_reversed_returns_correct_order(self):
+        self.client.login(username='user1', password='testpassword1!')
+        resp = self.client.get(reverse('tests:my_tests'), {'ordering': '-name'})
+        first_test = Test.objects.get(name='test8')
+        self.assertTrue('8' > '28')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['tests'][0])
 
 
 class AddTestViewTestCase(TestCase):
@@ -665,7 +762,7 @@ class PassedTestViewTestCase(TestCase):
                                        user=u,
                                        grade=50.23,
                                        score=5,
-                                       max_grade=10)
+                                       max_score=1)
 
     def setUp(self):
         self.client = Client()
@@ -701,3 +798,17 @@ class PassedTestViewTestCase(TestCase):
         last_test = PassedTests.objects.last()
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(last_test, resp.context['passed_tests'][0])
+
+    def test_ordering_by_data_passed_returns_correct_order(self):
+        self.client.login(username='user1', password='testpassword1!')
+        resp = self.client.get(reverse('tests:passed_tests'), {'ordering': 'data_passed'})
+        first_test = PassedTests.objects.first()
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['passed_tests'][0])
+
+    def test_ordering_by_data_passed_reversed_returns_correct_order(self):
+        self.client.login(username='user1', password='testpassword1!')
+        resp = self.client.get(reverse('tests:passed_tests'), {'ordering': '-data_passed'})
+        first_test = PassedTests.objects.last()
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(first_test, resp.context['passed_tests'][0])

@@ -69,8 +69,8 @@ class PassedTests(models.Model):
                              null=True, blank=True, on_delete=models.CASCADE)
     grade = models.DecimalField(decimal_places=2, max_digits=5)
     score = models.IntegerField()
-    max_grade = models.IntegerField()
+    max_score = models.IntegerField()
     data_passed = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user}'s grade is {self.grade}. Scored {self.score} out of {self.max_grade} points."
+        return f"{self.user}'s grade is {self.grade}. Scored {self.score} out of {self.max_score} points."

@@ -245,7 +245,7 @@ class MyProfileViewTestCase(TestCase):
                                        user=CustomUser.objects.first(),
                                        grade=51.42,
                                        score=4,
-                                       max_grade=10)
+                                       max_score=10)
 
     def setUp(self):
         self.client = Client()
