@@ -1,8 +1,9 @@
 {% extends 'main_app/base.html' %}
 
+{% block title %}Home{% endblock %}
+
 {% block content %}
 
-{% if request.user.is_authenticated %}
 {% if not request.user.email_confirmed and not messages  %}
 <div class="bg-warning text-dark p-1">
     <span class="fs-3">
@@ -10,13 +11,14 @@
     </span>
 </div>
 {% endif %}
-{% if request.user.first_name %}
-<h1 class="display-1 py-3">hi {{ request.user.first_name }}</h1>
-{% else %}
-<h1 class="display-1 py-3">hi {{ request.user }}</h1>
+
+<h1 class="display-1 py-3">
+    Welcome to Quizapp
+</h1>
+
+{% if request.user.is_authenticated %}
+<p>We are happy to see you again, {{ request.user.username }}.</p>
 {% endif %}
-{% else %}
-<h1 class="display-1 py-3">hi</h1>
-{% endif %}
+<h3 class="display-5 py-3">Quizapp is a web application designed for creating and passing tests.</h3>
 
 {% endblock %}

@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'main_app.apps.MainAppConfig',
-    'users.apps.UsersConfig'
+    'users.apps.UsersConfig',
+    'captcha'
 ]
 
 MIDDLEWARE = [
@@ -144,3 +145,5 @@ PASSWORD_RESET_TIMEOUT = 14400
 
 LOGIN_REDIRECT_URL = '/users/login/'
 LOGIN_URL = '/users/login/'
+
+CAPTCHA_LENGTH = 6

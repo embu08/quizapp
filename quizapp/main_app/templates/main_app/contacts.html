@@ -1,0 +1,41 @@
+{% extends 'main_app/base.html' %}
+
+{% block title %}Contacts{% endblock %}
+
+{% block content %}
+
+<h1 class="display-1 py-3">
+    Welcome to Quizapp
+</h1>
+<div class="fs-3 pb-3">You can contact me on <a href="https://www.linkedin.com/in/embu08/">LinkedIn</a> or visit my <a
+        href="https://github.com/embu08/">GitHub</a>, or just send a form!
+</div>
+<form method="post">
+    {% for hidden_field in form.hidden_fields %}
+    {{ hidden_field.errors }}
+    {{ hidden_field }}
+    {% endfor %}
+
+    {% csrf_token %}
+
+    {{ form.non_form_errors }}
+
+    {% for field in form %}
+    <div class="input-group pb-3 row m-0">
+        {% if field.errors %}
+        <div class="col-2"></div>
+        <div class="bg-danger col-10 mb-1 rounded p-0">{{ field.errors }}</div>
+        {% endif %}
+        <span class="input-group-text d-flex align-items-stretch col-2">{{ field.label }}</span>
+        <div class="col-10">{{ field }}</div>
+    </div>
+
+    {% endfor %}
+
+    <div class="p-0">
+        <button type="submit" class="btn btn-outline-info">Send</button>
+        <a role="button" class="btn btn-outline-primary" href="{% url 'tests:home' %}">Cancel</a>
+    </div>
+
+</form>
+{% endblock %}

@@ -2,16 +2,7 @@ from django import forms
 from .models import *
 from django.forms.models import inlineformset_factory
 from . import InlineFormSet
-
-
-class ContactForm(forms.Form):
-    name = forms.CharField(label='Username',
-                           widget=forms.TextInput(attrs={'class': ''}), min_length=1, max_length=255)
-    email = forms.EmailField(label='Email',
-                             widget=forms.TextInput(attrs={'class': ''}), min_length=1, max_length=255)
-    content = forms.CharField(label='Content',
-                              widget=forms.TextInput(attrs={'class': ''}), min_length=1, max_length=1000)
-    # captcha
+from captcha.fields import CaptchaField
 
 
 class CreateTestForm(forms.ModelForm):
@@ -65,3 +56,14 @@ TestQuestionsFormset = inlineformset_factory(Test,
                                              max_num=50,
                                              can_delete_extra=False,
                                              formset=InlineFormSet)
+
+
+class ContactForm(forms.Form):
+    name = forms.CharField(label='Username',
+                           widget=forms.TextInput(attrs={'class': 'form-control'}), min_length=1, max_length=255)
+    email = forms.EmailField(label='Email',
+                             widget=forms.TextInput(attrs={'class': 'form-control'}), min_length=1, max_length=255)
+    message = forms.CharField(label='Message',
+                              widget=forms.Textarea(attrs={'class': 'form-control', 'cols': 60, 'rows': 5}),
+                              min_length=1, max_length=1000)
+    captcha = CaptchaField()

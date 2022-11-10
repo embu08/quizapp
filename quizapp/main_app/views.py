@@ -1,11 +1,15 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.generic import CreateView, ListView, TemplateView, DetailView, FormView, UpdateView
 from django.contrib import messages
 from django.views.generic.detail import SingleObjectMixin
 from random import shuffle
+from quizapp.local_settings import EMAIL_FROM
+
+from django.core.mail import EmailMessage
 
 from .forms import *
 from .models import *
@@ -15,6 +19,31 @@ from django.db.models import Q
 
 class HomeView(TemplateView):
     template_name = 'main_app/home.html'
+
+
+class ContactsView(FormView):
+    template_name = 'main_app/contacts.html'
+    form_class = ContactForm
+    success_url = reverse_lazy('tests:home')
+
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        mail_subject = f'Message from Quizapp Contact Us. Sender: {form.cleaned_data["name"]}, {form.cleaned_data["email"]}'
+        message = form.cleaned_data["message"]
+        email = EmailMessage(mail_subject, message, to=[EMAIL_FROM])
+        if email.send():
+            messages.add_message(
+                self.request,
+                messages.SUCCESS,
+                'Your message was successfully sent. Thank you!'
+            )
+        else:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                "Message wasn't sent :("
+            )
+        return redirect('tests:home')
 
 
 class ShowAllTestsListVIew(ListView):

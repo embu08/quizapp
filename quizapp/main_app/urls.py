@@ -5,6 +5,7 @@ app_name = 'tests'
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
+    path('contacts/', ContactsView.as_view(), name='contacts'),
     path('tests/', ShowAllTestsListVIew.as_view(), name='tests'),
     path('tests/my/', ShowMyTestsListVIew.as_view(), name='my_tests'),
 
