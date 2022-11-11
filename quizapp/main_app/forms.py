@@ -59,7 +59,7 @@ TestQuestionsFormset = inlineformset_factory(Test,
 
 
 class ContactForm(forms.Form):
-    name = forms.CharField(label='Username',
+    name = forms.CharField(label='Your name',
                            widget=forms.TextInput(attrs={'class': 'form-control'}), min_length=1, max_length=255)
     email = forms.EmailField(label='Email',
                              widget=forms.TextInput(attrs={'class': 'form-control'}), min_length=1, max_length=255)

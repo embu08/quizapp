@@ -1,3 +1,5 @@
+from django.urls import reverse
+
 from main_app.models import Categories
 from quizapp import settings
 from users.models import CustomUser

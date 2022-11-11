@@ -26,7 +26,11 @@
         <div class="col-2"></div>
         <div class="bg-danger col-10 mb-1 rounded p-0">{{ field.errors }}</div>
         {% endif %}
+        {% if field.label != 'Captcha' %}
         <span class="input-group-text d-flex align-items-stretch col-2">{{ field.label }}</span>
+        {% else %}
+        <span class="input-group-text d-flex align-items-stretch col-2">Enter characters</span>
+        {% endif %}
         <div class="col-10">{{ field }}</div>
     </div>
 

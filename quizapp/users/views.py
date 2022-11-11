@@ -4,6 +4,7 @@ from django.contrib import messages, auth
 
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView, PasswordResetConfirmView
 from django.contrib.sites.shortcuts import get_current_site
+from django.db.models import Prefetch
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -117,8 +118,11 @@ class MyProfileView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user_data'] = CustomUser.objects.get(pk=self.request.user.pk)
-        context['created_tests'] = Test.objects.filter(owner=self.request.user.pk).order_by('-time_update')[:6]
-        context['passed_tests'] = PassedTests.objects.filter(user=self.request.user.pk).order_by('-data_passed')[:6]
+        context['created_tests'] = Test.objects.filter(owner=self.request.user.pk).order_by('-time_update')[
+                                   :6].select_related('category')
+        context['passed_tests'] = PassedTests.objects.prefetch_related(
+            Prefetch('test', queryset=Test.objects.all().select_related('owner'))).filter(
+            user=self.request.user.pk).order_by('-data_passed')[:6]
         return context
 
 

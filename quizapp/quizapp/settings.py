@@ -38,7 +38,8 @@ INSTALLED_APPS = [
 
     'main_app.apps.MainAppConfig',
     'users.apps.UsersConfig',
-    'captcha'
+    'captcha',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'quizapp.urls'
@@ -117,7 +119,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -130,7 +132,6 @@ except ImportError:
     pass
 
 AUTH_USER_MODEL = 'users.CustomUser'
-
 
 # email settings
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -147,3 +148,7 @@ LOGIN_REDIRECT_URL = '/users/login/'
 LOGIN_URL = '/users/login/'
 
 CAPTCHA_LENGTH = 6
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]

@@ -14,7 +14,7 @@ from django.core.mail import EmailMessage
 from .forms import *
 from .models import *
 from users.models import CustomUser
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 
 
 class HomeView(TemplateView):
@@ -60,7 +60,6 @@ class ShowAllTestsListVIew(ListView):
         '-name': 'Title reversed',
         'owner': 'Author',
         '-owner': 'Author reversed',
-        None: 'Updated last'
     }
 
     def get_context_data(self, *args, **kwargs):
@@ -70,7 +69,10 @@ class ShowAllTestsListVIew(ListView):
             questions[t.pk] = Questions.objects.filter(test=t.pk).count()
         context['questions'] = questions
         context['ordering'] = self.get_ordering()
-        context['title_ordering'] = self.ordering_title[context['ordering']]
+        if context['ordering'] == 'None' or not context['ordering']:
+            context['title_ordering'] = 'Updated last'
+        else:
+            context['title_ordering'] = self.ordering_title[context['ordering']]
         context['search'] = self.request.GET.get('search', '')
         return context
 
@@ -82,14 +84,14 @@ class ShowAllTestsListVIew(ListView):
             q = Test.objects.filter(
                 Q(name__icontains=search_query) | Q(description__icontains=search_query) |
                 Q(category__name__icontains=search_query) | Q(owner__username__icontains=search_query),
-                pk__in=tests_with_questions, is_public=True)
+                pk__in=tests_with_questions, is_public=True).select_related('category', 'owner')
         else:
-            q = Test.objects.filter(pk__in=tests_with_questions, is_public=True)
+            q = Test.objects.filter(pk__in=tests_with_questions, is_public=True).select_related('category', 'owner')
         ordering = self.get_ordering()
-        if ordering:
-            q = q.order_by(ordering)
-        else:
+        if ordering == 'None' or not ordering:
             q = q.order_by('-time_update')
+        else:
+            q = q.order_by(ordering)
         return q
 
     def get_ordering(self):
@@ -109,16 +111,15 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
         '-category': 'Category reversed',
         'name': 'Title',
         '-name': 'Title reversed',
-        None: 'Updated last'
     }
 
     def get_queryset(self):
-        q = Test.objects.filter(owner=self.request.user)
+        q = Test.objects.filter(owner=self.request.user).select_related('category', 'owner')
         ordering = self.get_ordering()
-        if ordering:
-            q = q.order_by(ordering)
-        else:
+        if ordering == 'None' or not ordering:
             q = q.order_by('-time_update')
+        else:
+            q = q.order_by(ordering)
         return q
 
     def get_context_data(self, *args, **kwargs):
@@ -128,7 +129,10 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
             questions[t.pk] = Questions.objects.filter(test=t.pk).count()
         context['questions'] = questions
         context['ordering'] = self.get_ordering()
-        context['title_ordering'] = self.ordering_title[context['ordering']]
+        if context['ordering'] == 'None' or not context['ordering']:
+            context['title_ordering'] = 'Updated last'
+        else:
+            context['title_ordering'] = self.ordering_title[context['ordering']]
         return context
 
     def get_ordering(self):
@@ -342,22 +346,25 @@ class PassedTestView(LoginRequiredMixin, ListView):
         '-test': 'Test reversed',
         'grade': 'Grade min to max',
         '-grade': 'Grade max to min',
-        None: 'Passed last'
     }
 
     def get_queryset(self):
-        q = PassedTests.objects.filter(user=self.request.user)
+        q = PassedTests.objects.prefetch_related(
+            Prefetch('test', queryset=Test.objects.all().select_related('owner'))).filter(user=self.request.user)
         ordering = self.get_ordering()
-        if ordering:
-            q = q.order_by(ordering)
-        else:
+        if ordering == 'None' or not ordering:
             q = q.order_by('-data_passed')
+        else:
+            q = q.order_by(ordering)
         return q
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ordering'] = self.get_ordering()
-        context['title_ordering'] = self.ordering_title[context['ordering']]
+        if context['ordering'] == 'None' or not context['ordering']:
+            context['title_ordering'] = 'Passed last'
+        else:
+            context['title_ordering'] = self.ordering_title[context['ordering']]
         return context
 
     def get_ordering(self):

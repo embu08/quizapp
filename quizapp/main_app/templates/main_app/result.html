@@ -2,7 +2,7 @@
 
 {% block title %}Results{% endblock %}
 {% block content %}
-<div class="display-1 py-3">Your grade is {{ grade }}. You scored {{ result }} out of {{ max_result }} points</div>
+<div class="display-1 py-3">Your grade is {{ grade }}.<br> You scored {{ result }} out of {{ max_result }} points</div>
 <i class="text-secondary fs-4">in {{ time }} sec</i>
 {% if show_results %}
 {% for q in questions %}
