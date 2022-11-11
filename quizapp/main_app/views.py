@@ -114,7 +114,7 @@ class ShowMyTestsListVIew(LoginRequiredMixin, ListView):
     }
 
     def get_queryset(self):
-        q = Test.objects.filter(owner=self.request.user).select_related('category', 'owner')
+        q = Test.objects.select_related('category', 'owner').filter(owner=self.request.user)
         ordering = self.get_ordering()
         if ordering == 'None' or not ordering:
             q = q.order_by('-time_update')
