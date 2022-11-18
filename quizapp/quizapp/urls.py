@@ -7,9 +7,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main_app.urls', namespace='tests')),
     path('users/', include('users.urls', namespace='users')),
+    path('api/', include('api.urls', namespace='api')),
     path('captcha/', include('captcha.urls')),
 ]
 
 if quizapp.local_settings.DEBUG:
-
     urlpatterns = [path('__debug__/', include('debug_toolbar.urls'))] + urlpatterns

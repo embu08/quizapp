@@ -38,8 +38,11 @@ INSTALLED_APPS = [
 
     'main_app.apps.MainAppConfig',
     'users.apps.UsersConfig',
+    'api.apps.ApiConfig',
+
     'captcha',
     'debug_toolbar',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -152,3 +155,10 @@ CAPTCHA_LENGTH = 6
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    ]
+}
