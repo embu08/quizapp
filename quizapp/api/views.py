@@ -23,7 +23,7 @@ class CreateTestAPIView(generics.ListCreateAPIView):
 
 class UpdateDestroyTestAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UpdateTestSerializer
-    permission_classes = (IsAuthenticated, UserIsOwnerOrStaff)
+    permission_classes = (UserIsOwnerOrStaff, )
 
     def get_queryset(self, *args, **kwargs):
         return Test.objects.filter(pk=self.kwargs['pk'])

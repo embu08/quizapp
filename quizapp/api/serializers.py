@@ -19,4 +19,5 @@ class UpdateTestSerializer(serializers.ModelSerializer):
         model = Test
         fields = (
             'name', 'description', 'time_create', 'time_update', 'is_public', 'access_by_link', 'show_results',
-            'category')
+            'category', 'owner')
+        read_only_fields = ('owner',)
