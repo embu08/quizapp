@@ -21,3 +21,10 @@ class UpdateTestSerializer(serializers.ModelSerializer):
             'name', 'description', 'time_create', 'time_update', 'is_public', 'access_by_link', 'show_results',
             'category', 'owner')
         read_only_fields = ('owner',)
+
+
+class QuestionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Questions
+        fields = '__all__'
+
