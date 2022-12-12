@@ -1,7 +1,6 @@
-from django.test import TestCase
-from main_app.models import *
 from django.db.utils import IntegrityError
-
+from django.test import TestCase
+from main_app.models import Categories, ValidationError, Test, Questions, PassedTests
 from users.models import CustomUser
 
 

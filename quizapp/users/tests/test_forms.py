@@ -1,7 +1,6 @@
-from users.forms import *
 from django.test import TestCase
-
 from django.test.client import Client
+from users.forms import RegisterUserForm, LoginUserForm, UpdateUserForm, PasswordResetFormCustom, SetPasswordFormCustom
 from users.models import CustomUser
 
 

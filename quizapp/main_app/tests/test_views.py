@@ -1,9 +1,7 @@
 from django.test import TestCase, SimpleTestCase
-import random
-
-from main_app.models import *
-from users.models import CustomUser
 from django.test.client import Client
+from main_app.models import reverse, Categories, Test, Questions, PassedTests
+from users.models import CustomUser
 
 
 class HomeViewTestCase(SimpleTestCase):
@@ -421,7 +419,7 @@ class UpdateTestViewTestCase(TestCase):
             'category': self.c,
             'description': 'cats',
         }
-        self.url_of_first_test = f'/tests/{self.test.pk}/edit/'
+        self.url_of_first_test = reverse('tests:test_edit', kwargs={'pk': self.test.pk})
 
     def test_view_url_exists_at_desired_location(self):
         self.client.login(username='user1', password='testpassword1!')
@@ -494,7 +492,7 @@ class TestDetailViewTestCase(TestCase):
             'category': self.c,
             'description': 'cats',
         }
-        self.url_of_first_test = f'/tests/{self.test.pk}/'
+        self.url_of_first_test = reverse('tests:test_detail', kwargs={'pk': self.test.pk})
 
     def test_view_url_exists_at_desired_location(self):
         self.client.login(username='user1', password='testpassword1!')
@@ -551,7 +549,8 @@ class TestQuestionsEditViewTestCase(TestCase):
             answer_2='idk2',
             answer_3='idk3',
             test=self.test)
-        self.url_of_first_question = f'/tests/{self.test.pk}/questions/edit/'
+
+        self.url_of_first_question = reverse('tests:test_questions_edit', kwargs={'pk': self.test.pk})
 
     def test_view_url_exists_at_desired_location(self):
         self.client.login(username='user1', password='testpassword1!')
@@ -670,10 +669,10 @@ class TestPassTestTestCase(TestCase):
         self.t2 = Test.objects.get(name='test2')
         self.t3 = Test.objects.get(name='test3')
         self.t4 = Test.objects.get(name='test4')
-        self.t1_url = '/tests/' + str(self.t1.pk) + '/pass/'
-        self.t2_url = '/tests/' + str(self.t2.pk) + '/pass/'
-        self.t3_url = '/tests/' + str(self.t3.pk) + '/pass/'
-        self.t4_url = '/tests/' + str(self.t4.pk) + '/pass/'
+        self.t1_url = reverse('tests:pass_test', kwargs={'pk': self.t1.pk})
+        self.t2_url = reverse('tests:pass_test', kwargs={'pk': self.t2.pk})
+        self.t3_url = reverse('tests:pass_test', kwargs={'pk': self.t3.pk})
+        self.t4_url = reverse('tests:pass_test', kwargs={'pk': self.t4.pk})
 
     def test_view_url_exists_at_desired_location_and_anonymous_user_get_access_to_public_test(self):
         resp = self.client.get(self.t1_url)

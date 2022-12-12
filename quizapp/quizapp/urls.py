@@ -1,7 +1,6 @@
+import quizapp.settings
 from django.contrib import admin
 from django.urls import path, include, re_path
-
-import quizapp.settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),

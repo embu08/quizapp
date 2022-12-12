@@ -1,8 +1,8 @@
-from django import forms
-from .models import *
-from django.forms.models import inlineformset_factory
 from . import InlineFormSet
+from .models import *
 from captcha.fields import CaptchaField
+from django import forms
+from django.forms.models import inlineformset_factory
 
 
 class CreateTestForm(forms.ModelForm):

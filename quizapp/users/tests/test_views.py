@@ -1,14 +1,11 @@
-from django.urls import reverse
-
-from main_app.models import Categories
-from quizapp import settings
-from users.models import CustomUser
-from django.test import TestCase
-from users.views import *
-from django.test.client import Client
 from django.contrib import auth
-from django.core import mail
 from django.contrib.messages import get_messages
+from django.core import mail
+from django.test import TestCase
+from django.test.client import Client
+from django.urls import reverse
+from main_app.models import Categories
+from users.views import CustomUser, Test, PassedTests
 
 password = 'testpassword1!'
 

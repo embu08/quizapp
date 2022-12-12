@@ -1,6 +1,5 @@
-from main_app.forms import *
 from django.test import TestCase
-from main_app.forms import TestQuestionsFormset
+from main_app.forms import TestQuestionsFormset, Categories, CreateTestForm, UpdateTestForm
 from users.models import CustomUser
 from main_app.models import Test, Questions
 

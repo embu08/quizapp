@@ -1,20 +1,18 @@
+from .forms import *
+from .models import *
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.mail import EmailMessage
+from django.db.models import Q, Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.generic import CreateView, ListView, TemplateView, DetailView, FormView, UpdateView
-from django.contrib import messages
 from django.views.generic.detail import SingleObjectMixin
 from random import shuffle
 from quizapp.local_settings import EMAIL_FROM
-
-from django.core.mail import EmailMessage
-
-from .forms import *
-from .models import *
 from users.models import CustomUser
-from django.db.models import Q, Prefetch
 
 
 class HomeView(TemplateView):
