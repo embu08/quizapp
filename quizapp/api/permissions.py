@@ -1,5 +1,7 @@
 from rest_framework import permissions
 
+from main_app.models import Questions, Test
+
 
 class EmailIsConfirmed(permissions.BasePermission):
     message = 'Please verify your email address. You cannot add tests.'
@@ -9,7 +11,10 @@ class EmailIsConfirmed(permissions.BasePermission):
 
 
 class UserIsOwnerOrStaff(permissions.BasePermission):
-    message = "Test doesn't exist or you are not the owner."
+    message = "Test or Question doesn't exist or you are not the owner."
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.owner or request.user.is_staff
+        if isinstance(obj, Test):
+            return request.user == obj.owner or request.user.is_staff
+        elif isinstance(obj, Questions):
+            return request.user == obj.test.owner or request.user.is_staff

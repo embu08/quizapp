@@ -47,3 +47,13 @@ class PassTestSerializer(serializers.BaseSerializer):
             }
             questions['question_' + str(n)] = questions_and_answers
         return questions
+
+
+class UpdateDestroyQuestionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Questions
+        fields = (
+            'question', 'correct_answer', 'answer_1', 'answer_2', 'answer_3',
+            'value', 'test'
+        )
+        read_only_fields = ('test',)

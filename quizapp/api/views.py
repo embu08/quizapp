@@ -1,7 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -9,7 +8,7 @@ from users.models import CustomUser
 from .permissions import EmailIsConfirmed, UserIsOwnerOrStaff
 
 from .serializers import TestSerializer, CreateTestSerializer, UpdateTestSerializer, QuestionsSerializer, \
-    PassTestSerializer
+    PassTestSerializer, UpdateDestroyQuestionsSerializer
 from main_app.models import Test, Questions, PassedTests
 
 
@@ -71,17 +70,18 @@ def pass_test(request, pk):
         show_results = Test.objects.filter(pk=pk).values('show_results')[0]['show_results']
         correct, total_questions = 0, len(questions)
         result, max_result = 0, 0
-        questions_title = []
 
+        # user answers
         for i in request.data:
             if i.startswith('question_'):
                 answers[i] = request.data.get(i).lower()
+
         correct_answers = {'question_' + str(n): v.correct_answer.lower() for n, v in enumerate(questions, 1)}
 
+        # result, max_result
         for k, v in correct_answers.items():
             user_answer = answers.get(k, None)
             value = questions[int(k[-1]) - 1].value
-            questions_title.append(questions[int(k[-1]) - 1].question)
             max_result += value
             if user_answer == v:
                 result += value
@@ -108,7 +108,6 @@ def pass_test(request, pk):
             to_return.update(to_return_questions)
 
         if request.user.is_authenticated:
-            print(request.user)
             PassedTests.objects.create(test=Test.objects.get(pk=pk),
                                        user=CustomUser.objects.get(pk=request.user.pk),
                                        grade=round(result / max_result * 100, 2),
@@ -116,3 +115,11 @@ def pass_test(request, pk):
                                        max_score=int(max_result))
 
         return Response(to_return)
+
+
+class UpdateDestroyQuestionsAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UpdateDestroyQuestionsSerializer
+    permission_classes = (IsAuthenticated, UserIsOwnerOrStaff)
+
+    def get_queryset(self, *args, **kwargs):
+        return Questions.objects.filter(pk=self.kwargs['pk'])
