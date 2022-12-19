@@ -1,4 +1,4 @@
-from .models import *
+from .models import Categories, Test, Questions, PassedTests
 from django.contrib import admin
 
 

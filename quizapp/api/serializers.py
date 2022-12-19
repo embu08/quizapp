@@ -1,5 +1,6 @@
+from main_app.models import Test, Questions
+from random import shuffle
 from rest_framework import serializers
-from main_app.models import *
 
 
 class TestSerializer(serializers.ModelSerializer):
@@ -28,3 +29,21 @@ class QuestionsSerializer(serializers.ModelSerializer):
         model = Questions
         fields = '__all__'
 
+
+class PassTestSerializer(serializers.BaseSerializer):
+
+    def to_representation(self, instance):
+        questions = {}
+        for n, i in enumerate(instance, 1):
+            answers = [i.correct_answer, i.answer_1, i.answer_2, i.answer_3]
+            shuffle(answers)
+            questions_and_answers = {
+                'question': i.question,
+                'answer_1': answers.pop(),
+                'answer_2': answers.pop(),
+                'answer_3': answers.pop(),
+                'answer_4': answers.pop(),
+                'value': i.value
+            }
+            questions['question_' + str(n)] = questions_and_answers
+        return questions
