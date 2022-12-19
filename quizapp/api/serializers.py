@@ -1,4 +1,4 @@
-from main_app.models import Test, Questions
+from main_app.models import Test, Questions, PassedTests
 from random import shuffle
 from rest_framework import serializers
 
@@ -57,3 +57,9 @@ class UpdateDestroyQuestionsSerializer(serializers.ModelSerializer):
             'value', 'test'
         )
         read_only_fields = ('test',)
+
+
+class PassedTestsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PassedTests
+        fields = '__all__'

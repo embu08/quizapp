@@ -1,5 +1,6 @@
+from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, filters
+from rest_framework import generics, filters, status
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -8,7 +9,7 @@ from users.models import CustomUser
 from .permissions import EmailIsConfirmed, UserIsOwnerOrStaff
 
 from .serializers import TestSerializer, CreateTestSerializer, UpdateTestSerializer, QuestionsSerializer, \
-    PassTestSerializer, UpdateDestroyQuestionsSerializer
+    PassTestSerializer, UpdateDestroyQuestionsSerializer, PassedTestsSerializer
 from main_app.models import Test, Questions, PassedTests
 
 
@@ -24,7 +25,7 @@ class TestAPIView(generics.ListAPIView):
 
 class MyTestsAPIView(generics.ListAPIView):
     serializer_class = TestSerializer
-    permission_classes = (IsAuthenticated, UserIsOwnerOrStaff)
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         return Test.objects.filter(owner=self.request.user.pk).order_by('pk')
@@ -60,7 +61,13 @@ class TestQuestionsCreateAPIView(generics.ListCreateAPIView):
 
 @api_view(['GET', 'POST'])
 def pass_test(request, pk):
+    test = Test.objects.get(pk=pk)
+    if not test.access_by_link and not test.is_public and request.user != test.owner and not request.user.is_staff:
+        return Response({'detail': 'The test does not exist or it is not accessible.'},
+                        status=status.HTTP_404_NOT_FOUND)
+
     questions = Questions.objects.filter(test=pk)
+
     if request.method == 'GET':
         serializer = PassTestSerializer(questions)
         return Response(serializer.data)
@@ -108,7 +115,7 @@ def pass_test(request, pk):
             to_return.update(to_return_questions)
 
         if request.user.is_authenticated:
-            PassedTests.objects.create(test=Test.objects.get(pk=pk),
+            PassedTests.objects.create(test=test,
                                        user=CustomUser.objects.get(pk=request.user.pk),
                                        grade=round(result / max_result * 100, 2),
                                        score=int(result),
@@ -123,3 +130,11 @@ class UpdateDestroyQuestionsAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self, *args, **kwargs):
         return Questions.objects.filter(pk=self.kwargs['pk'])
+
+
+class PassedTestsAPIView(generics.ListAPIView):
+    serializer_class = PassedTestsSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        return PassedTests.objects.filter(user=self.request.user.pk).order_by('-data_passed', )
