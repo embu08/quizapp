@@ -13,4 +13,6 @@ urlpatterns = [
     path('v1/tests/passed_tests/', PassedTestsAPIView.as_view(), name='passed_tests'),
     path('v1/questions/<int:pk>/', UpdateDestroyQuestionsAPIView.as_view(), name='questions_update'),
 
+    path('v1/users/create/', CreateUserAPIView.as_view(), name='create_user')
+
 ]

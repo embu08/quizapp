@@ -2,6 +2,7 @@ from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters, status
 from rest_framework.decorators import api_view
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -9,7 +10,7 @@ from users.models import CustomUser
 from .permissions import EmailIsConfirmed, UserIsOwnerOrStaff
 
 from .serializers import TestSerializer, CreateTestSerializer, UpdateTestSerializer, QuestionsSerializer, \
-    PassTestSerializer, UpdateDestroyQuestionsSerializer, PassedTestsSerializer
+    PassTestSerializer, UpdateDestroyQuestionsSerializer, PassedTestsSerializer, CreateUserSerializer
 from main_app.models import Test, Questions, PassedTests
 
 
@@ -25,7 +26,7 @@ class TestAPIView(generics.ListAPIView):
 
 class MyTestsAPIView(generics.ListAPIView):
     serializer_class = TestSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return Test.objects.filter(owner=self.request.user.pk).order_by('pk')
@@ -134,7 +135,11 @@ class UpdateDestroyQuestionsAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 class PassedTestsAPIView(generics.ListAPIView):
     serializer_class = PassedTestsSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return PassedTests.objects.filter(user=self.request.user.pk).order_by('-data_passed', )
+
+
+class CreateUserAPIView(generics.CreateAPIView):
+    serializer_class = CreateUserSerializer
