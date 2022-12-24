@@ -17,5 +17,4 @@ urlpatterns = [
 
     path('tests/<int:pk>/pass/', pass_test, name='pass_test'),
     path('tests/passed_tests/', PassedTestView.as_view(), name='passed_tests'),
-
 ]

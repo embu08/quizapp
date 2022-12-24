@@ -1,6 +1,7 @@
 from rest_framework import permissions
 
 from main_app.models import Questions, Test
+from users.models import CustomUser
 
 
 class EmailIsConfirmed(permissions.BasePermission):
@@ -11,10 +12,11 @@ class EmailIsConfirmed(permissions.BasePermission):
 
 
 class UserIsOwnerOrStaff(permissions.BasePermission):
-    message = "Test or Question doesn't exist or you are not the owner."
+    message = "Object doesn't exist or you are not the owner."
 
     def has_object_permission(self, request, view, obj):
-        if isinstance(obj, Test):
-            return request.user == obj.owner or request.user.is_staff
-        elif isinstance(obj, Questions):
-            return request.user == obj.test.owner or request.user.is_staff
+        if not request.user.is_staff:
+            if isinstance(obj, Test):
+                return request.user == obj.owner
+            elif isinstance(obj, Questions):
+                return request.user == obj.test.owner

@@ -114,3 +114,11 @@ class CreateUserSerializer(serializers.ModelSerializer):
                      'last_name': user.last_name,
                      'email': user.email}
         return to_return
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email', 'first_name', 'last_name', 'email', 'email_confirmed', 'password')
+        read_only_fields = ('username', 'email', 'email_confirmed')
+        extra_kwargs = {'password': {'write_only': True}}
