@@ -1,7 +1,6 @@
 from rest_framework import permissions
 
 from main_app.models import Questions, Test
-from users.models import CustomUser
 
 
 class EmailIsConfirmed(permissions.BasePermission):

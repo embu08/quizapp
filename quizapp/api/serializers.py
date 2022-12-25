@@ -119,6 +119,13 @@ class CreateUserSerializer(serializers.ModelSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'first_name', 'last_name', 'email', 'email_confirmed', 'password')
+        fields = ('username', 'email', 'first_name', 'last_name', 'email', 'email_confirmed')
         read_only_fields = ('username', 'email', 'email_confirmed')
-        extra_kwargs = {'password': {'write_only': True}}
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    class Meta:
+        model = CustomUser

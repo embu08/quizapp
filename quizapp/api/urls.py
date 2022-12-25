@@ -9,11 +9,12 @@ urlpatterns = [
     path('v1/tests/create/', CreateTestAPIView.as_view(), name='tests_create'),
     path('v1/tests/<int:pk>/', UpdateDestroyTestAPIView.as_view(), name='tests_update'),
     path('v1/tests/<int:pk>/questions/', TestQuestionsCreateAPIView.as_view(), name='tests_questions'),
-    path('v1/tests/<int:pk>/pass/', pass_test, name='tests_pass'),
-    path('v1/tests/passed_tests/', PassedTestsAPIView.as_view(), name='passed_tests'),
+    path('v1/tests/<int:pk>/pass/', pass_test, name='pass'),
+    path('v1/tests/passed/', PassedTestsAPIView.as_view(), name='passed'),
     path('v1/questions/<int:pk>/', UpdateDestroyQuestionsAPIView.as_view(), name='questions_update'),
 
     path('v1/users/create/', CreateUserAPIView.as_view(), name='create_user'),
-    path('v1/users/update/', UpdateUserAPIView.as_view(), name='update_user')
+    path('v1/users/update/', UpdateUserAPIView.as_view(), name='update_user'),
+    path('v1/users/change_password/', ChangePasswordView.as_view(), name='change_password')
 
 ]

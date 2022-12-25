@@ -261,15 +261,30 @@ class TestQuestionsEditView(LoginRequiredMixin, SingleObjectMixin, FormView):
 
 
 def pass_test(request, pk=None):
-    test = Test.objects.get(pk=pk)
-    if not test.access_by_link and not test.is_public and request.user != test.owner and not request.user.is_staff:
+    try:
+        test = Test.objects.get(pk=pk)
+    except Test.DoesNotExist:
+        test = None
+    questions = Questions.objects.filter(test=pk)
+
+    # before "or" - when test is private but you want to test passing (as user or admin)
+    if not (questions and test) or ((not test.access_by_link and not test.is_public) and (
+            request.user != test.owner and not request.user.is_staff)):
+        msg = 'You cannot pass the test.'
+        if not test:
+            msg += ' Test does not exist.'
+        else:
+            if not questions:
+                msg += ' Test have no questions.'
+            elif not test.access_by_link and not test.is_public:
+                msg += ' Test is not accessible.'
         messages.add_message(
             request,
             messages.ERROR,
-            'The test does not exist or it is not accessible.'
+            msg
         )
         return redirect('tests:home')
-    questions = Questions.objects.filter(test=pk)
+    print('прошло')
 
     # for result
     if request.method == 'POST':

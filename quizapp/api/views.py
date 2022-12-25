@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, filters, status
+from rest_framework import generics, filters, status, mixins
 from rest_framework.decorators import api_view
+from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -10,7 +11,7 @@ from .permissions import EmailIsConfirmed, UserIsOwnerOrStaff
 
 from .serializers import TestSerializer, CreateTestSerializer, UpdateTestSerializer, QuestionsSerializer, \
     PassTestSerializer, UpdateDestroyQuestionsSerializer, PassedTestsSerializer, CreateUserSerializer, \
-    UpdateUserSerializer
+    UpdateUserSerializer, ChangePasswordSerializer
 from main_app.models import Test, Questions, PassedTests
 
 
@@ -26,10 +27,9 @@ class TestAPIView(generics.ListAPIView):
 
 class MyTestsAPIView(generics.ListAPIView):
     serializer_class = TestSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        print(self.request.user)
         return Test.objects.filter(owner=self.request.user.pk).order_by('pk')
 
 
@@ -63,12 +63,23 @@ class TestQuestionsCreateAPIView(generics.ListCreateAPIView):
 
 @api_view(['GET', 'POST'])
 def pass_test(request, pk):
-    test = Test.objects.get(pk=pk)
-    if not test.access_by_link and not test.is_public and request.user != test.owner and not request.user.is_staff:
-        return Response({'detail': 'The test does not exist or it is not accessible.'},
-                        status=status.HTTP_404_NOT_FOUND)
-
+    try:
+        test = Test.objects.get(pk=pk)
+    except Test.DoesNotExist:
+        test = None
     questions = Questions.objects.filter(test=pk)
+    if not (questions and test) or ((not test.access_by_link and not test.is_public) and (
+            request.user != test.owner and not request.user.is_staff)):
+        msg = 'You cannot pass the test.'
+        if not test:
+            msg += ' Test does not exist.'
+        else:
+            if not questions:
+                msg += ' Test have no questions.'
+            elif not test.access_by_link and not test.is_public:
+                msg += ' Test is not accessible.'
+        return Response({'detail': msg},
+                        status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PassTestSerializer(questions)
@@ -148,7 +159,38 @@ class CreateUserAPIView(generics.CreateAPIView):
 
 class UpdateUserAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = UpdateUserSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         return CustomUser.objects.get(pk=self.request.user.pk)
+
+
+class ChangePasswordView(UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password. Note that both fields are case-sensitive."]},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'message': 'Password updated successfully',
+            }
+
+            return Response(response)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
