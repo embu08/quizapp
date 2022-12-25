@@ -15,6 +15,12 @@ urlpatterns = [
 
     path('v1/users/create/', CreateUserAPIView.as_view(), name='create_user'),
     path('v1/users/update/', UpdateUserAPIView.as_view(), name='update_user'),
-    path('v1/users/change_password/', ChangePasswordView.as_view(), name='change_password')
+    path('v1/users/change-password/', ChangePasswordAPIView.as_view(), name='change_password'),
+
+    path('v1/users/password-reset/', RestorePasswordAPIView.as_view(), name='password_reset'),
+    path('v1/users/password-reset/<uidb64>/<token>/', PasswordTokenCheckAPIView.as_view(),
+         name='password_reset_confirm'),
+    path('v1/users/password-reset-complete/', SetNewPasswordAPIView.as_view(), name='password_reset_complete'),
+
 
 ]

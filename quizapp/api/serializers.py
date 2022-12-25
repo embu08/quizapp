@@ -1,8 +1,11 @@
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, smart_bytes, force_str
+from rest_framework.exceptions import AuthenticationFailed
 
 from main_app.models import Test, Questions, PassedTests
 from random import shuffle
@@ -129,3 +132,61 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     class Meta:
         model = CustomUser
+
+
+class RestorePasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    class Meta:
+        fields = ('email',)
+
+    def validate(self, attrs):
+        email = attrs['email']
+        request = self.context.get('request')
+        if CustomUser.objects.filter(email=email).exists():
+            user = CustomUser.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            current_site = get_current_site(request=request).domain
+            relative_link = reverse('api:password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+            abs_url = ('https' if request.is_secure() else 'http') + '://' + current_site + relative_link
+            email_body = f'Hi {user.username},\nTo initiate the password reset process for your account, click the link below: \n\n' \
+                         f'{abs_url}' \
+                         f"\n\nIf clicking the link above doesn't work, please copy and paste the URL in a new browser window instead." \
+                         f"\n\nBest regards,\nQuizapp team."
+            email = EmailMessage(subject='Reset your password', body=email_body, to=[user.email])
+            if email.send():
+                print('sent')
+            else:
+                print("doesn't")
+            print(dir(email))
+
+        return super().validate(attrs)
+
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=6, max_length=68, write_only=True)
+    token = serializers.CharField(min_length=1, write_only=True)
+    uidb64 = serializers.CharField(min_length=1, write_only=True)
+
+    class Meta:
+        fields = ('password', 'token', 'uidb64')
+
+    def validate(self, attrs):
+        try:
+            password = attrs.get('password')
+            token = attrs.get('token')
+            uidb64 = attrs.get('uidb64')
+
+            user_id = force_str(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(id=user_id)
+            if not PasswordResetTokenGenerator().check_token(user=user, token=token):
+                print('if')
+                raise AuthenticationFailed('The reset link is invalid', 401)
+
+            user.set_password(password)
+            user.save()
+            return user
+        except Exception as e:
+            print('exception', e)
+            raise AuthenticationFailed('The reset link is invalid', 401)
