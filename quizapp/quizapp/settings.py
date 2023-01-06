@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
 from pathlib import Path
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,15 +36,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
 
-    'main_app.apps.MainAppConfig',
-    'users.apps.UsersConfig',
-    'api.apps.ApiConfig',
-
     'captcha',
     'debug_toolbar',
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+
+    'main_app.apps.MainAppConfig',
+    'users.apps.UsersConfig',
+    'api.apps.ApiConfig',
 ]
 # Application definition
 
@@ -172,3 +173,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
+
+if 'test' in sys.argv:
+    CAPTCHA_TEST_MODE = True

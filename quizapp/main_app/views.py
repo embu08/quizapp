@@ -25,8 +25,8 @@ class ContactsView(FormView):
     success_url = reverse_lazy('tests:home')
 
     def form_valid(self, form):
-        mail_subject = f'Message from Quizapp Contact Us. Sender: {form.cleaned_data["name"]}, {form.cleaned_data["email"]}'
-        message = form.cleaned_data["message"]
+        mail_subject = f'A Message from Quizapp Contact Us Form'
+        message = f'Sender: {form.cleaned_data["name"]}, {form.cleaned_data["email"]}\n{form.cleaned_data["message"]}'
         email = EmailMessage(mail_subject, message, to=[EMAIL_FROM])
         if email.send():
             messages.add_message(
@@ -40,6 +40,7 @@ class ContactsView(FormView):
                 messages.ERROR,
                 "Message wasn't sent :("
             )
+
         return redirect('tests:home')
 
 
@@ -75,7 +76,7 @@ class ShowAllTestsListVIew(ListView):
 
     def get_queryset(self):
         search_query = self.request.GET.get('search', '')
-        # take all tests, that have questions, then take zero index, because previous return in tuple
+        # take all tests, that have questions, then take zero index, because previous one returns in a tuple
         tests_with_questions = [b[0] for b in [q for q in Questions.objects.values_list('test').distinct()]]
         if search_query:
             q = Test.objects.filter(
@@ -284,7 +285,6 @@ def pass_test(request, pk=None):
             msg
         )
         return redirect('tests:home')
-    print('прошло')
 
     # for result
     if request.method == 'POST':

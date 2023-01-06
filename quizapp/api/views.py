@@ -19,18 +19,26 @@ from main_app.models import Test, Questions, PassedTests
 
 
 class TestAPIView(generics.ListAPIView):
-    queryset = Test.objects.filter(is_public=True).order_by('pk')
     serializer_class = TestSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     filterset_fields = ['id', 'name', 'description', 'category', 'owner', 'show_results']
-    search_fields = ['id', 'name', 'description', 'category', 'owner']
-    ordering_fields = ['id', 'name', 'category', 'owner', 'time_create', 'time_update']
+    search_fields = ['name', 'description', 'category', 'owner']
+    ordering_fields = ['name', 'category', 'owner', 'time_create', 'time_update']
+
+    def get_queryset(self):
+        tests_with_questions = [b[0] for b in [q for q in Questions.objects.values_list('test').distinct()]]
+        return Test.objects.filter(pk__in=tests_with_questions, is_public=True).select_related('category', 'owner')
 
 
 class MyTestsAPIView(generics.ListAPIView):
     serializer_class = TestSerializer
     permission_classes = (IsAuthenticated,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    filterset_fields = ['id', 'name', 'description', 'category', 'show_results']
+    search_fields = ['name', 'description', 'category']
+    ordering_fields = ['name', 'category', 'time_create', 'time_update']
 
     def get_queryset(self):
         return Test.objects.filter(owner=self.request.user.pk).order_by('pk')
@@ -81,12 +89,11 @@ def pass_test(request, pk):
                 msg += ' Test have no questions.'
             elif not test.access_by_link and not test.is_public:
                 msg += ' Test is not accessible.'
-        return Response({'detail': msg},
-                        status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': msg}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PassTestSerializer(questions)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
         answers = {}
@@ -124,7 +131,7 @@ def pass_test(request, pk):
             for n, v in enumerate(questions, 1):
                 to_return_questions['question_' + str(n)] = {
                     'question': v.question,
-                    'your_answer': answers['question_' + str(n)],
+                    'your_answer': answers.get('question_' + str(n), None),
                     'correct_answer': v.correct_answer,
                     'value': v.value,
                 }
@@ -137,7 +144,7 @@ def pass_test(request, pk):
                                        score=int(result),
                                        max_score=int(max_result))
 
-        return Response(to_return)
+        return Response(to_return, status=status.HTTP_200_OK)
 
 
 class UpdateDestroyQuestionsAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -190,11 +197,10 @@ class ChangePasswordAPIView(UpdateAPIView):
             self.object.save()
             response = {
                 'status': 'success',
-                'code': status.HTTP_200_OK,
                 'message': 'Password updated successfully',
             }
 
-            return Response(response)
+            return Response(response, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -233,4 +239,3 @@ class SetNewPasswordAPIView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
-

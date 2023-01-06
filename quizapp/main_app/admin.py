@@ -8,11 +8,11 @@ class CategoriesAdmin(admin.ModelAdmin):
 
 
 class TestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'description', 'category', 'owner', 'time_create', 'time_update')
+    list_display = ('id', 'name', 'description', 'category', 'owner', 'time_create', 'time_update',)
     fields = ('name', 'description', 'category')
     list_display_links = ('name',)
     search_fields = ('name', 'owner', 'description', 'time_create')
-    list_filter = ('category', 'owner', 'time_create')
+    list_filter = ('category', 'time_create', 'time_update', 'is_public', 'access_by_link', 'show_results')
     readonly_fields = ('owner', 'time_create', 'time_update')
 
 

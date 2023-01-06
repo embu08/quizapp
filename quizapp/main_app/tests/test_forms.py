@@ -1,5 +1,6 @@
+from django.core import mail
 from django.test import TestCase
-from main_app.forms import TestQuestionsFormset, Categories, CreateTestForm, UpdateTestForm
+from main_app.forms import TestQuestionsFormset, Categories, CreateTestForm, UpdateTestForm, ContactForm
 from users.models import CustomUser
 from main_app.models import Test, Questions
 
@@ -129,3 +130,53 @@ class TestQuestionsFormsetTestCase(TestCase):
         self.assertEqual(['This field is required.'], formset.errors[0]['question'])
         self.assertEqual(['This field is required.'], formset.errors[0]['correct_answer'])
         self.assertEqual(['This field is required.'], formset.errors[0]['answer_1'])
+
+
+class ContactFormTestCase(TestCase):
+    def test_valid_data_is_valid(self):
+        valid_data = {
+            'name': 'test_name',
+            'email': 'test@test.com',
+            'message': 'hello world',
+            'captcha_0': 'actually anything',
+            'captcha_1': 'PASSED'
+        }
+        form = ContactForm(data=valid_data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_returns_error_messages(self):
+        invalid_data = {
+            'name': '',
+            'email': '',
+            'message': '',
+            'captcha_0': '',
+            'captcha_1': ''
+        }
+        form = ContactForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(4, len(form.errors))
+        self.assertTrue('This field is required.' in form.errors['name'])
+        self.assertTrue('This field is required.' in form.errors['email'])
+        self.assertTrue('This field is required.' in form.errors['message'])
+        self.assertTrue('This field is required.' in form.errors['captcha'])
+        invalid_data2 = {
+            'name': 'test_name',
+            'email': 'test@test.com',
+            'message': 'hello world',
+            'captcha_0': 'actually anything',
+            'captcha_1': 'cat'
+        }
+        form2 = ContactForm(data=invalid_data2)
+
+    def test_invalid_captcha_raise_error(self):
+        invalid_data = {
+            'name': 'test_name',
+            'email': 'test@test.com',
+            'message': 'hello world',
+            'captcha_0': 'actually anything',
+            'captcha_1': 'not_passed'
+        }
+        form = ContactForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(1, len(form.errors))
+        self.assertTrue('Invalid CAPTCHA' in form.errors['captcha'])

@@ -1,3 +1,4 @@
+from django.core import mail
 from django.test import TestCase, SimpleTestCase
 from django.test.client import Client
 from main_app.models import reverse, Categories, Test, Questions, PassedTests
@@ -18,6 +19,47 @@ class HomeViewTestCase(SimpleTestCase):
         self.assertEqual(resp.status_code, 200)
 
         self.assertTemplateUsed(resp, 'main_app/home.html')
+
+
+class ContactViewTestCase(TestCase):
+    def test_view_url_exists_at_desired_location(self):
+        resp = self.client.get('/contacts/')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        resp = self.client.get(reverse('tests:contacts'))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        resp = self.client.get(reverse('tests:contacts'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'main_app/contacts.html')
+
+    def test_valid_form_sends_an_email(self):
+        valid_data = {
+            'name': 'test_name',
+            'email': 'test@test.com',
+            'message': 'hello world',
+            'captcha_0': 'actually anything',
+            'captcha_1': 'PASSED'
+        }
+        resp = self.client.post(reverse('tests:contacts'), data=valid_data)
+        self.assertEqual(302, resp.status_code)
+        self.assertEqual(reverse('tests:home'), resp.url)
+        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual('Sender: test_name, test@test.com\nhello world', mail.outbox[0].body)
+        self.assertEqual('A Message from Quizapp Contact Us Form', mail.outbox[0].subject)
+
+    def test_invalid_form_doesnt_send_an_email(self):
+        invalid_data = {
+            'name': 'test_name',
+            'email': 'test@test.com',
+            'message': 'hello world',
+            'captcha_0': 'actually anything',
+            'captcha_1': 'NOT PASSED'
+        }
+        resp = self.client.post(reverse('tests:contacts'), data=invalid_data)
+        self.assertEqual(0, len(mail.outbox))
 
 
 class ShowAllTestsListVIewTestCase(TestCase):
@@ -803,11 +845,15 @@ class PassedTestViewTestCase(TestCase):
         resp = self.client.get(reverse('tests:passed_tests'), {'ordering': 'data_passed'})
         first_test = PassedTests.objects.first()
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(first_test, resp.context['passed_tests'][0])
+        a = first_test
+        b = resp.context['passed_tests'][0]
+        self.assertTrue(a == b)
 
     def test_ordering_by_data_passed_reversed_returns_correct_order(self):
         self.client.login(username='user1', password='testpassword1!')
         resp = self.client.get(reverse('tests:passed_tests'), {'ordering': '-data_passed'})
         first_test = PassedTests.objects.last()
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(first_test, resp.context['passed_tests'][0])
+        a = first_test
+        b = resp.context['passed_tests'][0]
+        self.assertTrue(a == b)

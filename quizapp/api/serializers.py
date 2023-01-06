@@ -14,7 +14,6 @@ from rest_framework import serializers
 from users.models import CustomUser
 from users.tokens import account_activation_token
 
-# I know this is awful XD
 activate_email_message = {}
 
 
