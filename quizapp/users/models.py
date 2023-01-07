@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core import validators
 from django.db import models
 
 
@@ -18,7 +19,7 @@ class CustomUser(AbstractUser):
     )
     first_name = models.CharField(max_length=150, null=True, blank=True)
     last_name = models.CharField(max_length=150, null=True, blank=True)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, validators=[validators.EmailValidator(message="Invalid Email")])
     email_confirmed = models.BooleanField(default=False)
 
     def __str__(self):

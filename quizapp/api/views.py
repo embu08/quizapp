@@ -1,5 +1,4 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.shortcuts import get_object_or_404
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,13 +7,16 @@ from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from quizapp.local_settings import EMAIL_FROM
+from django.core.mail import EmailMessage
 
 from users.models import CustomUser
 from .permissions import EmailIsConfirmed, UserIsOwnerOrStaff
 
 from .serializers import TestSerializer, CreateTestSerializer, UpdateTestSerializer, QuestionsSerializer, \
     PassTestSerializer, UpdateDestroyQuestionsSerializer, PassedTestsSerializer, CreateUserSerializer, \
-    UpdateUserSerializer, ChangePasswordSerializer, RestorePasswordSerializer, SetNewPasswordSerializer
+    UpdateUserSerializer, ChangePasswordSerializer, RestorePasswordSerializer, SetNewPasswordSerializer, \
+    ContactUsSerializer
 from main_app.models import Test, Questions, PassedTests
 
 
@@ -29,6 +31,28 @@ class TestAPIView(generics.ListAPIView):
     def get_queryset(self):
         tests_with_questions = [b[0] for b in [q for q in Questions.objects.values_list('test').distinct()]]
         return Test.objects.filter(pk__in=tests_with_questions, is_public=True).select_related('category', 'owner')
+
+
+@api_view(['POST'])
+def contact_us(request):
+    data = {}
+    for k in request.data:
+        data[k] = request.data[k]
+    if request.user.is_authenticated:
+        data.setdefault('name', request.user.username)
+        data.setdefault('email', request.user.email)
+    serializer = ContactUsSerializer(data=data)
+    if serializer.is_valid():
+        mail_subject = f'A Message from Quizapp Contact Us Form'
+        message = f"Sender's name: {serializer.data['name']}, sender's email: {serializer.data['email']}\nMessage:\n{serializer.data['message']}"
+        email = EmailMessage(mail_subject, message, to=[EMAIL_FROM])
+        if email.send():
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': "Mail wasn't sent, we are working on fixing this issue."},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MyTestsAPIView(generics.ListAPIView):
@@ -119,7 +143,7 @@ def pass_test(request, pk):
 
         to_return = {
             'results': {
-                'your_grade': round(result / max_result * 100, 2),
+                'grade': round(result / max_result * 100, 2),
                 'scored': result,
                 'max_result': max_result,
                 'total_questions': total_questions,

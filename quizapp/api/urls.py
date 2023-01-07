@@ -13,6 +13,8 @@ urlpatterns = [
     path('v1/tests/passed/', PassedTestsAPIView.as_view(), name='passed'),
     path('v1/questions/<int:pk>/', UpdateDestroyQuestionsAPIView.as_view(), name='questions_update'),
 
+    path('v1/contacts/', contact_us, name='contacts'),
+
     path('v1/users/create/', CreateUserAPIView.as_view(), name='create_user'),
     path('v1/users/update/', UpdateUserAPIView.as_view(), name='update_user'),
     path('v1/users/change-password/', ChangePasswordAPIView.as_view(), name='change_password'),
@@ -21,6 +23,5 @@ urlpatterns = [
     path('v1/users/password-reset/<uidb64>/<token>/', PasswordTokenCheckAPIView.as_view(),
          name='password_reset_confirm'),
     path('v1/users/password-reset-complete/', SetNewPasswordAPIView.as_view(), name='password_reset_complete'),
-
 
 ]

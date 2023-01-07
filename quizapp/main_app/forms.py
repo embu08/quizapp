@@ -60,9 +60,9 @@ TestQuestionsFormset = inlineformset_factory(Test,
 
 class ContactForm(forms.Form):
     name = forms.CharField(label='Your name',
-                           widget=forms.TextInput(attrs={'class': 'form-control'}), min_length=1, max_length=255)
+                           widget=forms.TextInput(attrs={'class': 'form-control'}), min_length=2, max_length=255)
     email = forms.EmailField(label='Email',
-                             widget=forms.TextInput(attrs={'class': 'form-control'}), min_length=1, max_length=255)
+                             widget=forms.TextInput(attrs={'class': 'form-control'}), min_length=5, max_length=255)
     message = forms.CharField(label='Message',
                               widget=forms.Textarea(attrs={'class': 'form-control', 'cols': 60, 'rows': 5}),
                               min_length=1, max_length=1000)

@@ -1,5 +1,9 @@
+import json
+
+from captcha.fields import CaptchaField
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sites.shortcuts import get_current_site
+from django.core import validators
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -78,7 +82,18 @@ class PassTestSerializer(serializers.BaseSerializer):
                 'value': i.value
             }
             questions['question_' + str(n)] = questions_and_answers
+
         return questions
+
+
+class ContactUsSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255, min_length=2)
+    email = serializers.EmailField(min_length=5, max_length=255,
+                                   validators=[validators.EmailValidator(message="Invalid Email")])
+    message = serializers.CharField(min_length=1, max_length=1000)
+
+    class Meta:
+        fields = '__all__'
 
 
 class UpdateDestroyQuestionsSerializer(serializers.ModelSerializer):

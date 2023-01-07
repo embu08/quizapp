@@ -26,7 +26,7 @@ class ContactsView(FormView):
 
     def form_valid(self, form):
         mail_subject = f'A Message from Quizapp Contact Us Form'
-        message = f'Sender: {form.cleaned_data["name"]}, {form.cleaned_data["email"]}\n{form.cleaned_data["message"]}'
+        message = f"Sender's name: {form.cleaned_data['name']}, sender's email: {form.cleaned_data['email']}\nMessage:\n{form.cleaned_data['message']}"
         email = EmailMessage(mail_subject, message, to=[EMAIL_FROM])
         if email.send():
             messages.add_message(
