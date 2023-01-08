@@ -31,7 +31,17 @@
         {% else %}
         <span class="input-group-text d-flex align-items-stretch col-2">Enter characters</span>
         {% endif %}
+        {% if field.label == 'Your name' and request.user.is_authenticated %}
+        <div class="col-10">
+            <span class="input-group-text d-flex align-items-stretch bg-white">{{ request.user.username }}</span>
+        </div>
+        {% elif field.label == 'Email' and request.user.is_authenticated %}
+        <div class="col-10">
+            <span class="input-group-text d-flex align-items-stretch bg-white">{{ request.user.email }}</span>
+        </div>
+        {% else %}
         <div class="col-10">{{ field }}</div>
+        {% endif %}
     </div>
 
     {% endfor %}

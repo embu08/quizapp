@@ -47,7 +47,8 @@ class ContactViewTestCase(TestCase):
         self.assertEqual(302, resp.status_code)
         self.assertEqual(reverse('tests:home'), resp.url)
         self.assertEqual(1, len(mail.outbox))
-        self.assertEqual('Sender: test_name, test@test.com\nhello world', mail.outbox[0].body)
+        self.assertEqual("Sender's name: test_name, sender's email: test@test.com\nMessage:\nhello world",
+                         mail.outbox[0].body)
         self.assertEqual('A Message from Quizapp Contact Us Form', mail.outbox[0].subject)
 
     def test_invalid_form_doesnt_send_an_email(self):

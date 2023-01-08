@@ -25,8 +25,14 @@ class ContactsView(FormView):
     success_url = reverse_lazy('tests:home')
 
     def form_valid(self, form):
+        if self.request.user.is_authenticated:
+            name = self.request.user.username
+            email = self.request.user.email
+        else:
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
         mail_subject = f'A Message from Quizapp Contact Us Form'
-        message = f"Sender's name: {form.cleaned_data['name']}, sender's email: {form.cleaned_data['email']}\nMessage:\n{form.cleaned_data['message']}"
+        message = f"Sender's name: {name}, sender's email: {email}\nMessage:\n{form.cleaned_data['message']}"
         email = EmailMessage(mail_subject, message, to=[EMAIL_FROM])
         if email.send():
             messages.add_message(
