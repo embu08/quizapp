@@ -24,13 +24,15 @@ class TestAPIView(generics.ListAPIView):
     serializer_class = TestSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-    filterset_fields = ['id', 'name', 'description', 'category', 'owner', 'show_results']
-    search_fields = ['name', 'description', 'category', 'owner']
-    ordering_fields = ['name', 'category', 'owner', 'time_create', 'time_update']
+    filterset_fields = ['id', 'name', 'description', 'category__name', 'owner__username', 'show_results']
+    search_fields = ['name', 'description', 'category__name', 'owner__username']
+    ordering_fields = ['name', 'category__name', 'owner__username', 'time_create', 'time_update']
 
     def get_queryset(self):
         tests_with_questions = [b[0] for b in [q for q in Questions.objects.values_list('test').distinct()]]
-        return Test.objects.filter(pk__in=tests_with_questions, is_public=True).select_related('category', 'owner')
+        return Test.objects.filter(pk__in=tests_with_questions, is_public=True).select_related('category',
+                                                                                               'owner').order_by(
+            '-time_update')
 
 
 @api_view(['POST'])
@@ -60,16 +62,15 @@ class MyTestsAPIView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-    filterset_fields = ['id', 'name', 'description', 'category', 'show_results']
-    search_fields = ['name', 'description', 'category']
-    ordering_fields = ['name', 'category', 'time_create', 'time_update']
+    filterset_fields = ['id', 'name', 'description', 'category__name', 'show_results']
+    search_fields = ['name', 'description', 'category__name']
+    ordering_fields = ['name', 'category__name', 'time_create', 'time_update']
 
     def get_queryset(self):
-        return Test.objects.filter(owner=self.request.user.pk).order_by('pk')
+        return Test.objects.filter(owner=self.request.user.pk).order_by('-time_update')
 
 
-class CreateTestAPIView(generics.ListCreateAPIView):
-    queryset = Test.objects.filter(is_public=True).order_by('pk')
+class CreateTestAPIView(generics.CreateAPIView):
     serializer_class = CreateTestSerializer
     permission_classes = (IsAuthenticated, EmailIsConfirmed)
 

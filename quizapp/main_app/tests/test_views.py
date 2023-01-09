@@ -1,7 +1,8 @@
 from django.core import mail
 from django.test import TestCase, SimpleTestCase
 from django.test.client import Client
-from main_app.models import reverse, Categories, Test, Questions, PassedTests
+from main_app.models import Categories, Test, Questions, PassedTests
+from django.urls import reverse
 from users.models import CustomUser
 
 

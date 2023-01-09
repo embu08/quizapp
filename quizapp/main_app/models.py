@@ -7,7 +7,7 @@ from quizapp import settings
 class Categories(models.Model):
     name = models.CharField(max_length=100,
                             db_index=True, unique=True, blank=False,
-                            error_messages='Test with that name already exists')
+                            error_messages='Category with that name already exists.')
 
     def clean(self):
         if len(str(self.name)) < 3:

@@ -1,6 +1,3 @@
-import json
-
-from captcha.fields import CaptchaField
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core import validators
@@ -45,7 +42,7 @@ class TestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CreateTestSerializer(serializers.ModelSerializer):
+class CreateTestSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Test
         fields = ('name', 'description', 'is_public', 'access_by_link', 'show_results', 'category')
