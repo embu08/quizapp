@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.test import TestCase
 from django.core import mail
 from main_app.models import Categories, Test, Questions
@@ -387,9 +388,10 @@ class CreateTestAPIViewTestCase(TestCase):
 
     def test_invalid_form_cause_error(self):
         self.client.force_login(user=self.u1)
-        resp = self.client.post(reverse('api:tests_create'), {'name': '*' * 256})
+        resp = self.client.post(reverse('api:tests_create'), {'name': '*' * 256, 'description': '*' * 1001})
         self.assertEqual(400, resp.status_code)
         self.assertEqual('Ensure this field has no more than 255 characters.', resp.data['name'][0])
+        self.assertEqual('Ensure this field has no more than 1000 characters.', resp.data['description'][0])
 
     def test_valid_form_assigns_current_user_to_test_owner(self):
         self.client.force_login(user=self.u1)
@@ -405,14 +407,99 @@ class CreateTestAPIViewTestCase(TestCase):
     def test_valid_data_creates_fields(self):
         self.client.force_login(user=self.u1)
         data = {
-            'name': 'cat',
+            'name': 'cat2',
             'description': 'aaaaaaa',
             'is_public': True,
             'access_by_link': False,
             'show_results': True,
-            'category': 'new_category'
+            'category': self.c.pk
         }
-        resp = self.client.post(reverse('api:tests_create'), data)
-        print(resp.data)
-        print(Test.objects.get(name='cat').category)
-        self.assertEqual('cat', resp.data['name'])
+        self.client.post(reverse('api:tests_create'), data)
+        test = Test.objects.get(name='cat2')
+        self.assertEqual('cat2', test.name)
+        self.assertEqual('aaaaaaa', test.description)
+        self.assertEqual(True, test.is_public)
+        self.assertEqual(False, test.access_by_link)
+        self.assertEqual(True, test.show_results)
+        self.assertEqual(self.c, test.category)
+        self.assertEqual(self.u1, test.owner)
+
+
+class UpdateDestroyTestAPIViewTestCase(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.u1 = CustomUser.objects.create_user(
+            username='user1',
+            email='u1@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.u2 = CustomUser.objects.create_user(
+            username='user2',
+            email='u2@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.c = Categories.objects.create(name='cat')
+        self.test = Test.objects.create(name='test1', owner=self.u1)
+        self.data = {
+            'name': 'cat',
+            'category': self.c,
+            'description': 'cats',
+        }
+        self.url_of_first_test = reverse('api:tests_update', kwargs={'pk': self.test.pk})
+
+    def test_view_url_exists_at_desired_location(self):
+        self.client.force_login(user=self.u1)
+        url = f'/api/v1/tests/{self.test.pk}/'
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.get(reverse('api:tests_update', kwargs={'pk': self.test.pk}))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_anonymous_user_doesnt_have_access_to_test_edit_page(self):
+        resp = self.client.get(self.url_of_first_test)
+        self.assertEqual(401, resp.status_code)
+
+    def test_not_owner_of_the_test_doesnt_have_access_to_test_edit_page(self):
+        self.client.login(username='user2', password='testpassword1!')
+        resp = self.client.get(self.url_of_first_test)
+        self.assertEqual(403, resp.status_code)
+
+    def test_blank_form_cause_error_on_put(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.put(self.url_of_first_test, data={}, content_type='application/json')
+        self.assertEqual(400, resp.status_code)
+        self.assertEqual('This field is required.', resp.data['name'][0])
+
+    def test_invalid_form_cause_error(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.put(self.url_of_first_test, data={'name': '*' * 300}, content_type='application/json')
+        self.assertEqual(400, resp.status_code)
+        self.assertEqual('Ensure this field has no more than 255 characters.', resp.data['name'][0])
+
+    def test_valid_form_cause_test_changing_on_put(self):
+        self.client.force_login(user=self.u1)
+        test = Test.objects.get(name='test1')
+        self.assertEqual('test1', test.name)
+        self.assertEqual(None, test.description)
+        resp = self.client.put(self.url_of_first_test, {'name': 'test123', 'description': 'asasd'},
+                               content_type='application/json')
+        test.refresh_from_db()
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('test123', test.name)
+        self.assertEqual('asasd', test.description)
+
+    def test_valid_form_cause_test_changing_on_patch(self):
+        self.client.force_login(user=self.u1)
+        test = Test.objects.get(name='test1')
+        self.assertEqual(None, test.description)
+        resp = self.client.patch(self.url_of_first_test, {'description': 'asasd1111'},
+                                 content_type='application/json')
+        test.refresh_from_db()
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('asasd1111', test.description)

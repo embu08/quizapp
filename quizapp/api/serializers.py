@@ -42,7 +42,7 @@ class TestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CreateTestSerializer(serializers.HyperlinkedModelSerializer):
+class CreateTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
         fields = ('name', 'description', 'is_public', 'access_by_link', 'show_results', 'category')
@@ -166,11 +166,6 @@ class RestorePasswordSerializer(serializers.Serializer):
                          f"\n\nIf clicking the link above doesn't work, please copy and paste the URL in a new browser window instead." \
                          f"\n\nBest regards,\nQuizapp team."
             email = EmailMessage(subject='Reset your password', body=email_body, to=[user.email])
-            if email.send():
-                print('sent')
-            else:
-                print("doesn't")
-            print(dir(email))
 
         return super().validate(attrs)
 
@@ -192,12 +187,10 @@ class SetNewPasswordSerializer(serializers.Serializer):
             user_id = force_str(urlsafe_base64_decode(uidb64))
             user = CustomUser.objects.get(id=user_id)
             if not PasswordResetTokenGenerator().check_token(user=user, token=token):
-                print('if')
                 raise AuthenticationFailed('The reset link is invalid', 401)
 
             user.set_password(password)
             user.save()
             return user
         except Exception as e:
-            print('exception', e)
             raise AuthenticationFailed('The reset link is invalid', 401)
