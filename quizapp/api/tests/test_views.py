@@ -1,7 +1,9 @@
+import random
+
 from django.shortcuts import get_object_or_404
 from django.test import TestCase
 from django.core import mail
-from main_app.models import Categories, Test, Questions
+from main_app.models import Categories, Test, Questions, PassedTests
 from users.models import CustomUser
 from django.urls import reverse
 from django.test.client import Client
@@ -793,3 +795,95 @@ class UpdateDestroyQuestionsAPIViewTestCase(TestCase):
 
         resp4 = self.client.get(reverse('api:questions_update', kwargs={'pk': self.q1.pk}))
         self.assertEqual(403, resp4.status_code)
+
+
+class PassedTestsAPIViewTestCase(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        number_of_tests, questions = 21, 5
+        Categories.objects.create(name='cat')
+        u = CustomUser.objects.create_user(
+            username='user1',
+            email='user1@test.com',
+            password='testpassword1!',
+            email_confirmed=True
+        )
+        Test.objects.create(
+            name='test',
+            owner=u,
+            description='cat',
+            category=Categories.objects.first(), )
+        for t in range(number_of_tests):
+            PassedTests.objects.create(test=Test.objects.get(name='test'),
+                                       user=u,
+                                       grade=random.randint(0, 100),
+                                       score=5,
+                                       max_score=1)
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username='user1', password='testpassword1!')
+
+    def test_view_url_exists_at_desired_location(self):
+        resp = self.client.get('/api/v1/tests/passed/')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        resp = self.client.get(reverse('api:passed'))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_pagination_is_ten(self):
+        resp = self.client.get(reverse('api:passed'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(10, len(resp.data['results']))
+        resp2 = self.client.get(reverse('api:passed') + '?page=2')
+        self.assertEqual(resp2.status_code, 200)
+        self.assertEqual(10, len(resp2.data['results']))
+        resp3 = self.client.get(reverse('api:passed') + '?page=3')
+        self.assertEqual(resp3.status_code, 200)
+        self.assertEqual(1, len(resp3.data['results']))
+
+    def test_ordering_last_passed_is_first(self):
+        resp = self.client.get(reverse('api:passed'))
+        last_test = PassedTests.objects.last()
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(last_test.id, resp.data['results'][0]['id'])
+
+    def test_anonymous_user_doesnt_have_passed_tests_page(self):
+        self.client.logout()
+        resp = self.client.get(reverse('api:passed'))
+        self.assertEqual(401, resp.status_code)
+
+    def test_ordering_by_data_passed_returns_correct_order(self):
+        resp = self.client.get(reverse('api:passed'), {'ordering': 'data_passed'})
+        first_passed_test = PassedTests.objects.get(pk=1)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(first_passed_test.id, resp.data['results'][0]['id'])
+
+    def test_ordering_by_data_passed_reversed_returns_correct_order(self):
+        resp = self.client.get(reverse('api:passed'), {'ordering': '-data_passed'})
+        first_passed_test = PassedTests.objects.get(pk=21)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(first_passed_test.id, resp.data['results'][0]['id'])
+
+    def test_ordering_by_grade_returns_correct_order(self):
+        resp = self.client.get(reverse('api:passed'), {'ordering': 'grade'})
+        max_grade = min(PassedTests.objects.values_list('grade', flat=True))
+        t = PassedTests.objects.filter(grade=max_grade)[0]
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(t.id, resp.data['results'][0]['id'])
+
+    def test_ordering_by_grade_reversed_returns_correct_order(self):
+        resp = self.client.get(reverse('api:passed'), {'ordering': '-grade'})
+        max_grade = max(PassedTests.objects.values_list('grade', flat=True))
+        t = PassedTests.objects.filter(grade=max_grade)[0]
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(t.id, resp.data['results'][0]['id'])
+
+    def test_search_by_grade_returns_correct_query(self):
+        max_grade = max(PassedTests.objects.values_list('grade', flat=True))
+        resp = self.client.get(reverse('api:passed'), {'search': max_grade})
+        t = PassedTests.objects.filter(grade=max_grade)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(len(t), len(resp.data['results']))

@@ -186,6 +186,10 @@ class UpdateDestroyQuestionsAPIView(generics.RetrieveUpdateDestroyAPIView):
 class PassedTestsAPIView(generics.ListAPIView):
     serializer_class = PassedTestsSerializer
     permission_classes = (IsAuthenticated,)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    search_fields = ['test__name', 'grade', 'data_passed']
+    ordering_fields = ['test__name', 'grade', 'data_passed']
 
     def get_queryset(self):
         return PassedTests.objects.filter(user=self.request.user.pk).order_by('-data_passed', )
