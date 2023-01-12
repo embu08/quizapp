@@ -90,8 +90,11 @@ class TestQuestionsCreateAPIView(generics.ListCreateAPIView):
     serializer_class = QuestionsSerializer
     permission_classes = (IsAuthenticated, UserIsOwnerOrStaff)
 
+    def get_object(self):
+        return Test.objects.get(pk=self.kwargs['pk'])
+
     def get_queryset(self, *args, **kwargs):
-        return Questions.objects.filter(test=self.kwargs['pk'])
+        return Questions.objects.filter(test=self.kwargs['pk']).order_by('pk')
 
     def perform_create(self, serializer):
         serializer.save(test_id=self.kwargs['pk'])
@@ -114,7 +117,7 @@ def pass_test(request, pk):
                 msg += ' Test have no questions.'
             elif not test.access_by_link and not test.is_public:
                 msg += ' Test is not accessible.'
-        return Response({'detail': msg}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': msg}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
         serializer = PassTestSerializer(questions)

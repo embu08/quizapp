@@ -503,3 +503,293 @@ class UpdateDestroyTestAPIViewTestCase(TestCase):
         test.refresh_from_db()
         self.assertEqual(200, resp.status_code)
         self.assertEqual('asasd1111', test.description)
+
+
+class TestQuestionsCreateAPIViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.u1 = CustomUser.objects.create_user(
+            username='user1',
+            email='u1@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.u2 = CustomUser.objects.create_user(
+            username='user2',
+            email='u2@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.c = Categories.objects.create(name='cat')
+        self.test = Test.objects.create(name='test1', owner=self.u1)
+
+    def test_view_url_exists_at_desired_location(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.get(f'/api/v1/tests/{self.test.pk}/questions/')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.get(reverse('api:tests_questions', kwargs={'pk': self.test.pk}))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_anonymous_user_doesnt_have_access_to_questions_creation_page(self):
+        resp = self.client.get(reverse('api:tests_questions', kwargs={'pk': self.test.pk}))
+        self.assertEqual(resp.status_code, 401)
+
+    def test_not_owner_of_the_test_doesnt_have_access_to_test_edit_page(self):
+        self.client.force_login(user=self.u2)
+        resp = self.client.get(reverse('api:tests_questions', kwargs={'pk': self.test.pk}))
+        self.assertEqual(resp.status_code, 403)
+
+    def test_valid_form_creates_a_question(self):
+        self.client.force_login(user=self.u1)
+        data = {
+            'question': '2 + 6',
+            'correct_answer': '8',
+            'answer_1': '10',
+            'answer_2': '23',
+            'answer_3': '26',
+            'value': 4,
+            'test': self.test.pk
+        }
+        resp = self.client.post(reverse('api:tests_questions', kwargs={'pk': self.test.pk}), data=data)
+        self.assertEqual(201, resp.status_code)
+        self.assertTrue(Questions.objects.filter(question='2 + 6').exists())
+
+    def test_invalid_form_cause_errors(self):
+        self.client.force_login(user=self.u1)
+        data = {
+            'question': '',
+            'correct_answer': '',
+            'answer_1': '',
+            'answer_2': '*' * 256,
+            'answer_3': '*' * 256,
+            'value': '',
+            'test': 150
+        }
+        resp = self.client.post(reverse('api:tests_questions', kwargs={'pk': self.test.pk}), data=data)
+        self.assertEqual(400, resp.status_code)
+        self.assertEqual('This field may not be blank.', resp.data['question'][0])
+        self.assertEqual('This field may not be blank.', resp.data['correct_answer'][0])
+        self.assertEqual('This field may not be blank.', resp.data['answer_1'][0])
+        self.assertEqual('Ensure this field has no more than 255 characters.', resp.data['answer_2'][0])
+        self.assertEqual('Ensure this field has no more than 255 characters.', resp.data['answer_3'][0])
+        self.assertEqual('Invalid pk "150" - object does not exist.', resp.data['test'][0])
+
+
+class PassTestAPITestCase(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        u = CustomUser.objects.create_user(
+            username='user1',
+            email='u1@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        Test.objects.create(name='test1', owner=u)
+        Test.objects.create(name='test2', owner=u, is_public=False)
+        Test.objects.create(name='test3', owner=u, is_public=False, access_by_link=False)
+        Test.objects.create(name='test4', owner=u, show_results=False)
+        for t in Test.objects.all():
+            for q in range(2):
+                Questions.objects.create(
+                    question='why' + str(q),
+                    correct_answer='correct_answer',
+                    answer_1='wrong_answer1',
+                    answer_2='wrong_answer1',
+                    answer_3='wrong_answer1',
+                    value=1,
+                    test=t)
+
+    def setUp(self):
+        self.u1 = CustomUser.objects.get(username='user1')
+        self.u2 = CustomUser.objects.create_user(
+            username='user2',
+            email='u2@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.client = Client()
+        self.t1 = Test.objects.get(name='test1')
+        self.t2 = Test.objects.get(name='test2')
+        self.t3 = Test.objects.get(name='test3')
+        self.t4 = Test.objects.get(name='test4')
+
+    def test_view_url_exists_at_desired_location_and_anonymous_user_get_access_to_public_test(self):
+        resp = self.client.get(f'/api/v1/tests/{self.t1.pk}/pass/')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        resp = self.client.get(reverse('api:pass', kwargs={'pk': self.t1.pk}))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_non_owner_user_get_access_to_public_test(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.get(reverse('api:pass', kwargs={'pk': self.t1.pk}))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_private_test_accessible_by_link_and_not_public(self):
+        resp = self.client.get(reverse('api:pass', kwargs={'pk': self.t2.pk}))
+        self.assertTrue(self.t2.access_by_link)
+        self.assertEqual(resp.status_code, 200)
+        resp2 = self.client.get(reverse('api:tests'))
+        public_tests = [i['id'] for i in resp2.data['results']]
+        self.assertTrue(self.t2.pk not in public_tests)
+
+    def test_private_and_not_accessible_by_link_not_accessible(self):
+        resp = self.client.get(reverse('api:pass', kwargs={'pk': self.t3.pk}))
+        self.assertEqual(403, resp.status_code)
+
+    def test_correct_answers_increase_score(self):
+        self.client.login(username='user1', password='testpassword1!')
+        data = {'question_1': 'correct_answer', 'question_2': 'correct_answer'}
+        resp = self.client.post(reverse('api:pass', kwargs={'pk': self.t1.pk}), data=data)
+        self.assertEqual(100.0, resp.data['results']['grade'])
+        self.assertEqual(2, resp.data['results']['correct_answers'])
+        self.assertTrue(data['question_1'] == resp.data['question_1']['your_answer'])
+        self.assertTrue(data['question_2'] == resp.data['question_2']['your_answer'])
+
+    def test_incorrect_answers_doesnt_increase_score(self):
+        self.client.login(username='user1', password='testpassword1!')
+        data = {'question_1': 'correct_answer', 'question_2': 'asd'}
+        resp = self.client.post(reverse('api:pass', kwargs={'pk': self.t1.pk}), data=data)
+        self.assertEqual(50.0, resp.data['results']['grade'])
+        self.assertEqual(1, resp.data['results']['correct_answers'])
+        self.assertTrue(data['question_1'] == resp.data['question_1']['your_answer'])
+        self.assertTrue(data['question_2'] == resp.data['question_2']['your_answer'])
+
+    def test_context_is_reduced_if_not_show_results(self):
+        self.client.login(username='user1', password='testpassword1!')
+        data = {'question_1': 'correct_answer', 'question_2': 'correct_answer'}
+        resp = self.client.post(reverse('api:pass', kwargs={'pk': self.t4.pk}), data=data)
+        self.assertFalse('question_1' in resp.data)
+        self.assertFalse('question_2' in resp.data)
+        self.assertEqual(100.0, resp.data['results']['grade'])
+
+
+class UpdateDestroyQuestionsAPIViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.u1 = CustomUser.objects.create_user(
+            username='user1',
+            email='u1@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.u2 = CustomUser.objects.create_user(
+            username='user2',
+            email='u2@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.test = Test.objects.create(name='test1', owner=self.u1)
+        self.test2 = Test.objects.create(name='test2', owner=self.u1)
+
+        self.q1 = Questions.objects.create(
+            question='why',
+            correct_answer='correct_answer',
+            answer_1='wrong_answer1',
+            answer_2='wrong_answer1',
+            answer_3='wrong_answer1',
+            value=1,
+            test=self.test)
+
+    def test_view_url_exists_at_desired_location(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.get(f'/api/v1/questions/{self.q1.pk}/')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.get(reverse('api:questions_update', kwargs={'pk': self.q1.pk}))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_anonymous_user_doesnt_have_access_to_questions_creation_page(self):
+        resp = self.client.get(reverse('api:questions_update', kwargs={'pk': self.q1.pk}))
+        self.assertEqual(resp.status_code, 401)
+
+    def test_not_owner_of_the_test_doesnt_have_access_to_test_edit_page(self):
+        self.client.force_login(user=self.u2)
+        resp = self.client.get(reverse('api:questions_update', kwargs={'pk': self.q1.pk}))
+        self.assertEqual(resp.status_code, 403)
+
+    def test_valid_put_form_updates_a_question(self):
+        self.client.force_login(user=self.u1)
+        data = {
+            'question': '2 + 12',
+            'correct_answer': '14',
+            'answer_1': '10',
+            'answer_2': '150',
+            'answer_3': '26',
+            'value': 3,
+        }
+        q1 = Questions.objects.get(question='why')
+        resp = self.client.put(reverse('api:questions_update', kwargs={'pk': self.q1.pk}),
+                               data=data, content_type='application/json')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('why', q1.question)
+        self.assertEqual('correct_answer', q1.correct_answer)
+        self.assertEqual('wrong_answer1', q1.answer_1)
+        self.assertEqual('wrong_answer1', q1.answer_2)
+        self.assertEqual('wrong_answer1', q1.answer_3)
+        self.assertEqual(1, q1.value)
+        q1.refresh_from_db()
+        self.assertEqual('2 + 12', q1.question)
+        self.assertEqual('14', q1.correct_answer)
+        self.assertEqual('10', q1.answer_1)
+        self.assertEqual('150', q1.answer_2)
+        self.assertEqual('26', q1.answer_3)
+        self.assertEqual(3, q1.value)
+
+    def test_valid_patch_form_updates_a_question(self):
+        self.client.force_login(user=self.u1)
+        data = {
+            'question': 'aaaa',
+            'value': 300
+        }
+        q1 = Questions.objects.get(question='why')
+        resp = self.client.patch(reverse('api:questions_update', kwargs={'pk': self.q1.pk}),
+                                 data=data, content_type='application/json')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('why', q1.question)
+        self.assertEqual(1, q1.value)
+        q1.refresh_from_db()
+        self.assertEqual('aaaa', q1.question)
+        self.assertEqual(300, q1.value)
+
+    def test_delete_method_deletes_question(self):
+        self.client.force_login(user=self.u1)
+        resp = self.client.delete(reverse('api:questions_update', kwargs={'pk': self.q1.pk}))
+        self.assertEqual(204, resp.status_code)
+        self.assertFalse(Questions.objects.filter(question='why').exists())
+        self.assertEqual(0, len(Questions.objects.all()))
+
+    def test_updating_questions_is_not_accessible_for_not_owner_or_stuff(self):
+        self.client.force_login(user=self.u2)
+        data = {
+            'question': 'aaaa',
+            'value': 300
+        }
+        resp = self.client.patch(reverse('api:questions_update', kwargs={'pk': self.q1.pk}),
+                                 data=data, content_type='application/json')
+        self.assertEqual(403, resp.status_code)
+
+        data2 = {
+            'question': '2 + 12',
+            'correct_answer': '14',
+            'answer_1': '10',
+            'answer_2': '150',
+            'answer_3': '26',
+            'value': 3,
+        }
+        resp2 = self.client.put(reverse('api:questions_update', kwargs={'pk': self.q1.pk}),
+                                data=data2, content_type='application/json')
+        self.assertEqual(403, resp2.status_code)
+
+        resp3 = self.client.delete(reverse('api:questions_update', kwargs={'pk': self.q1.pk}))
+        self.assertEqual(403, resp3.status_code)
+
+        resp4 = self.client.get(reverse('api:questions_update', kwargs={'pk': self.q1.pk}))
+        self.assertEqual(403, resp4.status_code)
