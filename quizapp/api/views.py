@@ -1,5 +1,6 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
+from django.utils.encoding import smart_str, DjangoUnicodeDecodeError, force_str
 from django.utils.http import urlsafe_base64_decode
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters, status, mixins
@@ -11,6 +12,7 @@ from quizapp.local_settings import EMAIL_FROM
 from django.core.mail import EmailMessage
 
 from users.models import CustomUser
+from users.tokens import account_activation_token
 from .permissions import EmailIsConfirmed, UserIsOwnerOrStaff
 
 from .serializers import TestSerializer, CreateTestSerializer, UpdateTestSerializer, QuestionsSerializer, \
@@ -18,6 +20,25 @@ from .serializers import TestSerializer, CreateTestSerializer, UpdateTestSeriali
     UpdateUserSerializer, ChangePasswordSerializer, RestorePasswordSerializer, SetNewPasswordSerializer, \
     ContactUsSerializer
 from main_app.models import Test, Questions, PassedTests
+
+
+@api_view(['POST'])
+def activate(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except:
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.email_confirmed = True
+        user.save()
+        return Response({'status': 'success', 'details': 'Your email was successfully confirmed!'},
+                        status=status.HTTP_200_OK)
+    else:
+        return Response({'status': 'failure', 'details': 'Activation link is invalid!'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class TestAPIView(generics.ListAPIView):

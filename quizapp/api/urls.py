@@ -15,6 +15,8 @@ urlpatterns = [
 
     path('v1/contacts/', contact_us, name='contacts'),
 
+    path('v1/activate/<uidb64>/<token>/', activate, name='activate'),
+
     path('v1/users/create/', CreateUserAPIView.as_view(), name='create_user'),
     path('v1/users/update/', UpdateUserAPIView.as_view(), name='update_user'),
     path('v1/users/change-password/', ChangePasswordAPIView.as_view(), name='change_password'),

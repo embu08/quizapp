@@ -1,5 +1,7 @@
 import random
 
+from django.contrib import auth
+from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import get_object_or_404
 from django.test import TestCase
 from django.core import mail
@@ -887,3 +889,92 @@ class PassedTestsAPIViewTestCase(TestCase):
         t = PassedTests.objects.filter(grade=max_grade)
         self.assertEqual(200, resp.status_code)
         self.assertEqual(len(t), len(resp.data['results']))
+
+
+class CreateUserAPIViewTestCase(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.u = CustomUser.objects.create_user(
+            username='user',
+            email='user@test.com',
+            email_confirmed=True,
+            password='password123'
+        )
+
+    def test_view_url_exists_at_desired_location(self):
+        resp = self.client.post('/api/v1/users/create/')
+        self.assertEqual(400, resp.status_code)
+
+    def test_view_url_accessible_by_name(self):
+        resp = self.client.post(reverse('api:create_user'))
+        self.assertEqual(400, resp.status_code)
+
+    def test_valid_form_creates_user(self):
+        data = {
+            'username': 'user1',
+            'email': 'user1@test.com',
+            'first_name': 'User',
+            'last_name': 'One',
+            'password': 'password123',
+        }
+        self.assertFalse(CustomUser.objects.filter(username='user1').exists())
+        resp = self.client.post(reverse('api:create_user'), data=data)
+
+        self.assertEqual(201, resp.status_code)
+
+        self.assertTrue(CustomUser.objects.filter(username='user1').exists())
+
+    def test_activate_email_sends_email_and_verification_link_is_correct(self):
+        '''
+        this also tests api.views.activate function
+        '''
+        data = {
+            'username': 'user1',
+            'email': 'user1@test.com',
+            'first_name': 'User',
+            'last_name': 'One',
+            'password': 'password123',
+        }
+        self.assertFalse(CustomUser.objects.filter(username='user1').exists())
+
+        resp = self.client.post(reverse('api:create_user'), data=data)
+        self.assertEqual(201, resp.status_code)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(CustomUser.objects.filter(username='user1').exists())
+        self.assertFalse(CustomUser.objects.get(username='user1').email_confirmed)
+
+        activation_link = ''
+        for line in mail.outbox[0].body.splitlines():
+            if 'http' in line:
+                activation_link = line
+        resp2 = self.client.post(activation_link)
+
+        self.assertEqual(200, resp2.status_code)
+        self.assertTrue(CustomUser.objects.get(username='user1').email_confirmed)
+
+    def test_wrong_activation_link_doesnt_confirm_an_email_and_returns_a_failure_message(self):
+        data = {
+            'username': 'user1',
+            'email': 'user1@test.com',
+            'first_name': 'User',
+            'last_name': 'One',
+            'password': 'password123',
+        }
+        self.assertFalse(CustomUser.objects.filter(username='user1').exists())
+
+        resp = self.client.post(reverse('api:create_user'), data=data)
+        self.assertEqual(201, resp.status_code)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(CustomUser.objects.filter(username='user1').exists())
+        self.assertFalse(CustomUser.objects.get(username='user1').email_confirmed)
+
+        activation_link = ''
+        for line in mail.outbox[0].body.splitlines():
+            if 'http' in line:
+                activation_link = line
+        activation_link = activation_link[:-1] + 'a' + '/'
+        resp2 = self.client.post(activation_link)
+
+        self.assertEqual(400, resp2.status_code)
+        self.assertFalse(CustomUser.objects.get(username='user1').email_confirmed)

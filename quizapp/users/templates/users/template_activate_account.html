@@ -2,7 +2,7 @@
 Hello from {{ domain }},
 Dear {{ user }}, please click on the link below to complete verification of your email:
 
-{{ protocol }}://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}
+{{ protocol }}://{{ domain }}{% url 'api:activate' uidb64=uid token=token %}
 
 If clicking the link above doesn't work, please copy and paste the URL in a new browser
 window instead.
