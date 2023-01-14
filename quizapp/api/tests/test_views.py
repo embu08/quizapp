@@ -978,3 +978,52 @@ class CreateUserAPIViewTestCase(TestCase):
 
         self.assertEqual(400, resp2.status_code)
         self.assertFalse(CustomUser.objects.get(username='user1').email_confirmed)
+
+
+class UpdateUserAPIViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            username='user',
+            email='user@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+
+    def test_view_url_exists_at_desired_location(self):
+        self.client.force_login(user=self.user)
+        resp = self.client.get('/api/v1/users/update/')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.force_login(user=self.user)
+        resp = self.client.get(reverse('api:update_user'))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_anonymous_user_doesnt_have_access_to_my_profile_update_page(self):
+        resp = self.client.get(reverse('api:update_user'))
+        self.assertEqual(401, resp.status_code)
+
+    def test_updated_user_data_via_patch_saves_correctly(self):
+        self.client.force_login(user=self.user)
+        self.assertEqual(None, CustomUser.objects.get(username='user').first_name)
+        self.assertEqual(None, CustomUser.objects.get(username='user').last_name)
+        data = {
+            'first_name': 'User',
+        }
+        resp = self.client.patch(reverse('api:update_user'), data, content_type='application/json')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('User', CustomUser.objects.get(username='user').first_name)
+
+    def test_updated_user_data_via_put_saves_correctly(self):
+        self.client.force_login(user=self.user)
+        self.assertEqual(None, CustomUser.objects.get(username='user').first_name)
+        self.assertEqual(None, CustomUser.objects.get(username='user').last_name)
+        data = {
+            'first_name': 'User',
+            'last_name': 'Test',
+        }
+        resp = self.client.put(reverse('api:update_user'), data, content_type='application/json')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('User', CustomUser.objects.get(username='user').first_name)
+        self.assertEqual('Test', CustomUser.objects.get(username='user').last_name)
