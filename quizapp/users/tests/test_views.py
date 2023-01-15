@@ -444,7 +444,7 @@ class PasswordResetViewCustomTestCase(TestCase):
         self.assertEqual(resp3.status_code, 302)
         self.assertRedirects(resp3, reverse('users:login'))
 
-    def test_reset_password_doesnt_sends_email_if_nobody_has_it(self):
+    def test_reset_password_doesnt_send_an_email_if_nobody_has_it(self):
         data = {
             'email': 'aaaaa@test.com',
         }

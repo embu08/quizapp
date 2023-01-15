@@ -1027,3 +1027,154 @@ class UpdateUserAPIViewTestCase(TestCase):
         self.assertEqual(200, resp.status_code)
         self.assertEqual('User', CustomUser.objects.get(username='user').first_name)
         self.assertEqual('Test', CustomUser.objects.get(username='user').last_name)
+
+
+class ChangePasswordAPIViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            username='user',
+            email='user@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+
+    def test_view_url_exists_at_desired_location(self):
+        self.client.force_login(user=self.user)
+        resp = self.client.get('/api/v1/users/change-password/')
+        self.assertEqual(405, resp.status_code)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.force_login(user=self.user)
+        resp = self.client.get(reverse('api:change_password'))
+        self.assertEqual(405, resp.status_code)
+
+    def test_anonymous_user_doesnt_have_access_to_my_profile_password_change(self):
+        resp = self.client.get(reverse('api:change_password'))
+        self.assertEqual(401, resp.status_code)
+
+    def test_change_password_works(self):
+        self.client.force_login(user=self.user)
+        data = {
+            'old_password': 'testpassword1!',
+            'new_password': 'testpassword'
+        }
+        resp = self.client.put(reverse('api:change_password'), data, content_type='application/json')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('Password updated successfully', resp.data['message'])
+
+    def test_after_changing_password_user_can_login_with_new_password(self):
+        self.client.login(username='user', password='testpassword1!')
+        data = {
+            'old_password': 'testpassword1!',
+            'new_password': 'testpassword'
+        }
+        resp = self.client.put(reverse('api:change_password'), data, content_type='application/json')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('Password updated successfully', resp.data['message'])
+
+        self.client.logout()
+        u = auth.get_user(self.client)
+        self.assertFalse(u.is_authenticated)
+
+        self.client.login(username='user', password='testpassword')
+        u = auth.get_user(self.client)
+        self.assertTrue(u.is_authenticated)
+        self.assertEqual('user', u.username)
+
+    def test_after_changing_password_user_cannot_login_with_old_password(self):
+        self.client.login(username='user', password='testpassword1!')
+        data = {
+            'old_password': 'testpassword1!',
+            'new_password': 'testpassword'
+        }
+        resp = self.client.put(reverse('api:change_password'), data, content_type='application/json')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('Password updated successfully', resp.data['message'])
+
+        self.client.logout()
+        u = auth.get_user(self.client)
+        self.assertFalse(u.is_authenticated)
+
+        self.client.login(username='user', password='testpassword1!')
+        u = auth.get_user(self.client)
+        self.assertFalse(u.is_authenticated)
+
+
+class RestoreAndResetPasswordAPIViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            username='user',
+            email='user@test.com',
+            email_confirmed=True,
+            password='testpassword1!'
+        )
+        self.user2 = CustomUser.objects.create_user(
+            username='user2',
+            email='user2@test.com',
+            email_confirmed=False,
+            password='testpassword1!'
+        )
+
+    def test_view_url_exists_at_desired_location(self):
+        resp = self.client.post('/api/v1/users/password-reset/')
+        self.assertEqual(400, resp.status_code)
+
+    def test_view_url_accessible_by_name(self):
+        resp = self.client.post(reverse('api:password_reset'))
+        self.assertEqual(400, resp.status_code)
+
+    def test_user_is_able_to_login_using_new_password_after_password_reset(self):
+        data_for_resp = {
+            'email': 'user@test.com',
+        }
+        resp = self.client.post(reverse('api:password_reset'), data_for_resp)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(1, len(mail.outbox))
+
+        reset_url = ''
+        for line in mail.outbox[0].body.splitlines():
+            if line.startswith('http'):
+                reset_url = line
+
+        resp2 = self.client.post(reset_url)
+        self.assertEqual(200, resp2.status_code)
+
+        data_for_resp3 = {
+            'token': resp2.data['token'],
+            'uidb64': resp2.data['uidb64'],
+            'password': 'brand_new_password',
+        }
+        resp3 = self.client.post(reverse('api:password_reset_complete'), data=data_for_resp3)
+        self.assertEqual(200, resp3.status_code)
+
+        u = auth.get_user(self.client)
+        self.assertFalse(u.is_authenticated)
+
+        self.client.login(username='user', password='brand_new_password')
+        u = auth.get_user(self.client)
+        self.assertTrue(u.is_authenticated)
+        self.assertEqual('user', u.username)
+
+    def test_reset_password_doesnt_send_an_email_if_nobody_has_it(self):
+        data = {
+            'email': 'aaaaa@test.com',
+        }
+        resp = self.client.post(reverse('api:password_reset'), data)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(0, len(mail.outbox))
+        self.assertEqual(
+            'Password reset link has been sent to your email, if you are already registered and your email was confirmed.',
+            resp.data['success'])
+
+    def test_reset_password_doesnt_send_an_email_if_it_wasnt_confirmed(self):
+        data = {
+            'email': 'user2@test.com',
+        }
+        resp = self.client.post(reverse('api:password_reset'), data)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(0, len(mail.outbox))
+        self.assertEqual(
+            'Password reset link has been sent to your email, if you are already registered and your email was confirmed.',
+            resp.data['success'])

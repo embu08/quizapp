@@ -158,16 +158,23 @@ class RestorePasswordSerializer(serializers.Serializer):
         request = self.context.get('request')
         if CustomUser.objects.filter(email=email).exists():
             user = CustomUser.objects.get(email=email)
-            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
-            token = PasswordResetTokenGenerator().make_token(user)
-            current_site = get_current_site(request=request).domain
-            relative_link = reverse('api:password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
-            abs_url = ('https' if request.is_secure() else 'http') + '://' + current_site + relative_link
-            email_body = f'Hi {user.username},\nTo initiate the password reset process for your account, click the link below: \n\n' \
-                         f'{abs_url}' \
-                         f"\n\nIf clicking the link above doesn't work, please copy and paste the URL in a new browser window instead." \
-                         f"\n\nBest regards,\nQuizapp team."
-            email = EmailMessage(subject='Reset your password', body=email_body, to=[user.email])
+            if user.email_confirmed:
+                uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+                token = PasswordResetTokenGenerator().make_token(user)
+                current_site = get_current_site(request=request).domain
+                relative_link = reverse('api:password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+                abs_url = ('https' if request.is_secure() else 'http') + '://' + current_site + relative_link
+                email_body = f'Hi {user.username},\nTo initiate the password reset process for your account, click the link below: \n\n' \
+                             f'{abs_url}' \
+                             f"\n\nIf clicking the link above doesn't work, please copy and paste the URL in a new browser window instead." \
+                             f"\n\nBest regards,\nQuizapp team."
+                email = EmailMessage(subject='Reset your password', body=email_body, to=[user.email])
+                if not email.send():
+                    print("Email wasn't sent because of reasons.")
+        #     else:
+        #         print(f'Email "{email}" was not sent because mail was never confirmed.')
+        # else:
+        #     print(f'Email "{email}" was never used or confirmed.')
 
         return super().validate(attrs)
 
@@ -190,7 +197,6 @@ class SetNewPasswordSerializer(serializers.Serializer):
             user = CustomUser.objects.get(id=user_id)
             if not PasswordResetTokenGenerator().check_token(user=user, token=token):
                 raise AuthenticationFailed('The reset link is invalid', 401)
-
             user.set_password(password)
             user.save()
             return user

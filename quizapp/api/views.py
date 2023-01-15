@@ -254,8 +254,8 @@ class ChangePasswordAPIView(UpdateAPIView):
             }
 
             return Response(response, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RestorePasswordAPIView(GenericAPIView):
@@ -264,12 +264,13 @@ class RestorePasswordAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        return Response({'success': 'Password reset link has been sent to your email, if you are already registered.'},
+        return Response({
+                            'success': 'Password reset link has been sent to your email, if you are already registered and your email was confirmed.'},
                         status=status.HTTP_200_OK)
 
 
 class PasswordTokenCheckAPIView(GenericAPIView):
-    def get(self, request, uidb64, token):
+    def post(self, request, uidb64, token):
         try:
             user_id = smart_str(urlsafe_base64_decode(uidb64))
             user = CustomUser.objects.get(id=user_id)
@@ -288,7 +289,7 @@ class PasswordTokenCheckAPIView(GenericAPIView):
 class SetNewPasswordAPIView(GenericAPIView):
     serializer_class = SetNewPasswordSerializer
 
-    def patch(self, request):
+    def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
