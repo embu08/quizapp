@@ -1,8 +1,6 @@
 import random
 
 from django.contrib import auth
-from django.contrib.auth.models import AnonymousUser
-from django.shortcuts import get_object_or_404
 from django.test import TestCase
 from django.core import mail
 from main_app.models import Categories, Test, Questions, PassedTests
